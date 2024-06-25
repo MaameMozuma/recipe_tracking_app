@@ -33,7 +33,7 @@ class _customBottomNavigationBar extends State<customBottomNavigationBar> {
     return Scaffold(
       body: screens[currentPage],
       bottomNavigationBar: Container(
-        height: 80, // Adjust the height as per your preference
+        // height: 80, // Adjust the height as per your preference
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
