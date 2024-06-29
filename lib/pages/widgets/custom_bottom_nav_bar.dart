@@ -33,7 +33,7 @@ class _customBottomNavigationBar extends State<customBottomNavigationBar> {
     return Scaffold(
       body: screens[currentPage],
       bottomNavigationBar: Container(
-        // height: 80, // Adjust the height as per your preference
+        //height: 80, // Adjust the height as per your preference
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -49,7 +49,7 @@ class _customBottomNavigationBar extends State<customBottomNavigationBar> {
           BottomNavigationBar(
             backgroundColor: Colors.white,
             currentIndex: currentPage,
-            selectedItemColor: Color.fromRGBO(120, 82, 174, 1.0),
+            selectedItemColor: const Color.fromRGBO(120, 82, 174, 1.0),
             unselectedItemColor: Colors.grey,
             onTap: (value) {
               setState(() {

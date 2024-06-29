@@ -28,7 +28,6 @@ class _EditUserState extends State<EditUser> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -37,37 +36,36 @@ class _EditUserState extends State<EditUser> {
             profileImage: _profileImage,
             onPickImage: _pickImage
           ),
-          const SizedBox(height: 80,),
-          SizedBox(
-            width: screenWidth * 0.9,
-            child: const LabeledTextField(
+          Padding(padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 80,),
+          const SizedBox(
+            child: LabeledTextField(
             label: 'Full Name',
             placeholder: 'Enter your full name',
             readOnly: false
           ),
           ),
           const SizedBox(height: 10,),
-          SizedBox(
-            width: screenWidth * 0.9,
-            child: const LabeledTextField(
+          const SizedBox(
+            child: LabeledTextField(
             label: 'Email',
             placeholder: 'Enter email',
             readOnly: true
           ),
           ),
           const SizedBox(height: 10,),
-          SizedBox(
-            width: screenWidth * 0.9,
-            child: const LabeledTextField(
+          const SizedBox(
+            child: LabeledTextField(
             label: 'Phone Number',
             placeholder: 'Enter phone',
             readOnly: true
           ),
           ),
           const SizedBox(height: 10,),
-          SizedBox(
-            width: screenWidth * 0.9,
-            child: const LabeledTextField(
+          const SizedBox(
+            child: LabeledTextField(
             label: 'Location',
             placeholder: 'Enter location',
             readOnly: true
@@ -75,14 +73,15 @@ class _EditUserState extends State<EditUser> {
           ),
           const SizedBox(height: 20,),
           SizedBox(
-            width: screenWidth * 0.9,
             height: 70,
             child: CustomBtn(
             text: 'Save', 
             onPressed: (){print('button pressed!');}
             ),
           ),
+            ],),)
         ],),
+        
       ),
     );
   }
