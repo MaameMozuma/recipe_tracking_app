@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'package:team_proj_leanne/pages/sub_pages/edit_user.dart';
 import 'package:team_proj_leanne/pages/widgets/custom_bottom_nav_bar.dart';
 
 void main() {
