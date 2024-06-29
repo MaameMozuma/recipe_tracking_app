@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:team_proj_leanne/pages/sub_pages/user_statistics.dart';
 import 'package:team_proj_leanne/pages/widgets/circle_avatar.dart';
 import 'package:team_proj_leanne/pages/widgets/progress_card.dart';
 
@@ -24,15 +26,15 @@ class _DashboardState extends State<Dashboard> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        flexibleSpace: const Padding(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, 10),
+        flexibleSpace: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
           child: Align(
             alignment: Alignment.bottomCenter,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
+                const Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +53,16 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ],
                 ),
-                MyCircleAvatar(),
+                GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const UserStatistics(),
+                        ),
+                      );
+                    },
+                    child: const MyCircleAvatar()),
               ],
             ),
           ),
@@ -128,7 +139,9 @@ class _DashboardState extends State<Dashboard> {
               ],
             ),
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           const Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(

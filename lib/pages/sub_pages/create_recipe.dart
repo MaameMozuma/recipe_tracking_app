@@ -210,7 +210,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 120, 82, 174),
+                    color: const Color.fromARGB(255, 120, 82, 174),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Center(
