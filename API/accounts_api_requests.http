@@ -1,0 +1,44 @@
+### Login
+POST http://127.0.0.1:5000/login
+Content-Type: application/json
+
+### Signup
+POST http://127.0.0.1:5000/signup
+Content-Type: application/json
+
+{
+  "username" : "Admin3",
+  "email" : "admin3@gmail.com",
+  "password" : "admineasy12#",
+  "height" : "179",
+  "weight" : "87",
+  "dob" : "02/02/02",
+  "phone_number" : "0251231256"
+}
+
+### Send OTP to client
+GET http://127.0.0.1:5000/send_otp
+Content-Type: application/json
+
+{
+  "phone_number" : "233556207957"
+}
+
+### Verify client OTP
+POST http://127.0.0.1:5000/verify_otp
+Content-Type: application/json
+
+{
+  "code" : 606953,
+  "phone_number" : "233556207957"
+}
+
+### Set user goals
+PATCH http://127.0.0.1:5000/set_goals
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTg2ODM2NCwianRpIjoiZDgzOTc5NjktYTUwNC00YzQ0LThlZDktNTYwOTJlMTk1ZTk1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IkFkbWluMyIsIm5iZiI6MTcxOTg2ODM2NCwiY3NyZiI6IjMyOWI4OTc2LWQ2NGEtNDQ1Ny1iYzI2LTg3ZjllNTNlMGNhYyIsImV4cCI6MTcxOTg2OTI2NH0.PfrXHWxDn7hEuLe4IIX1-Uo-ttbxv1Yf8lcEozKhKjA
+
+{
+  "steps" : 10000,
+  "calories" : 1800
+}
