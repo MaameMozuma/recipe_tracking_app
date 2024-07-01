@@ -9,6 +9,7 @@ class UserStatistics extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(310),
         child: ClipRRect(
