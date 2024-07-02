@@ -296,7 +296,7 @@ class _AddMealPageState extends State<AddMealPage> {
                           child: CustomBtn(
                               text: 'Save',
                               onPressed: () {
-                                print('button pressed!');
+                                Navigator.pop(context);
                               }),
                         ),
                 ],
