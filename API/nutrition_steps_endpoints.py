@@ -75,25 +75,96 @@ def get_recipe():
         return jsonify(recipe.to_dict()), 200
     else:
         return jsonify({'error': 'Recipe not found'}), 404
-#
-# @app.route('/create_meal', methods=['POST'])
-# def create_meal():
-#     data = request.json
-#     meal_name = data.get('meal_name')
-#     recipe_id = data.get('recipe_id')
-#     date = data.get('date')
-#
-#     if not meal_name or not recipe_id or not date:
-#         return jsonify({'error': 'Missing meal information'}), 400
-#
-#     meal_ref = db.collection('meals').document()
-#     meal_ref.set({
-#         'meal_name': meal_name,
-#         'recipe_id': recipe_id,
-#         'date': date
-#     })
-#
-#     return jsonify({'id': meal_ref.id}), 201
+
+@app.route('/add_meal', methods=['POST'])
+def create_meal():
+    data = request.json
+    user_id = data.get('user_id')
+    meal_name = data.get('meal_name')
+    ingredients = data.get('ingredients')
+    image_url = data.get('image_url')
+    time_hours = data.get('time_hours')
+    time_minutes = data.get('time_minutes')
+
+
+    current_date = datetime.utcnow().strftime('%Y-%m-%d')
+
+    if not user_id or not meal_name or not ingredients:
+        return jsonify({'error': 'Missing meal information'}), 400
+
+    # Check if ingredients is a list of dictionaries
+    if not isinstance(ingredients, list) or not all(isinstance(i, dict) for i in ingredients):
+        return jsonify({'error': 'Ingredients must be a list of dictionaries'}), 400
+
+    meal_ref = db.collection('meals').document()
+    meal_data = {
+        'user_id': user_id,
+        'meal_name': meal_name,
+        'ingredients': ingredients,
+        'image_url': image_url,
+        'time_hours': time_hours,
+        'time_minutes': time_minutes,
+        'date': current_date
+    }
+
+    meal_ref.set(meal_data)
+
+    return jsonify({'id': meal_ref.id}), 201
+
+@app.route('/get_meal', methods=['POST'])
+def get_meal():
+    data = request.json
+    user_doc_id = data.get('user_doc_id')
+    meal_name = data.get('meal_name')
+
+    if not meal_name or not user_doc_id:
+        return jsonify({'error': 'User ID and meal name are required'}), 400
+
+    # user_ref = db.collection('user').document(user_doc_id)
+    meals_ref = db.collection('meals').where('user_id', '==', user_doc_id).where('meal_name', '==', meal_name)
+    meals = meals_ref.stream()
+
+    result = None
+
+    for meal in meals:
+        meal_data = meal.to_dict()
+        ingredients = meal_data.get('ingredients', [])
+        detailed_ingredients = []
+        total_calories = 0
+
+        for ingredient in ingredients:
+            item = ingredient.get('item')
+            quantity = ingredient.get('quantity')
+
+            if item:
+                headers = {
+                    'X-Api-Key': API_KEY
+                }
+                params = {
+                    'query': item
+                }
+
+                response = requests.get(CALORIE_URL, headers=headers, params=params)
+                if response.status_code == 200:
+                    nutrition_info = response.json()
+                    if nutrition_info['items']:
+                        calorie_info = nutrition_info['items'][0].get('calories', 0)
+                        detailed_ingredients.append({'item': item, 'calories': calorie_info})
+                        total_calories += calorie_info
+
+        result = {
+            'meal_name': meal_name,
+            'image_url': meal_data.get('image_url'),
+            'ingredients': detailed_ingredients,
+            'total_calories': total_calories
+        }
+        break  
+
+    if not result:
+        return jsonify({'error': 'Meal not found'}), 404
+
+    return jsonify(result), 200
+
 
 def get_steps_for_date(user_doc_id, date):
     user_ref = db.collection('user').document(user_doc_id).collection('dailySteps').document(date)
@@ -145,6 +216,8 @@ def get_calories():
         return jsonify({'error': 'No steps data found for the specified date'}), 404
 
 
+
+
 # @app.route('/recipe_search', methods=['POST'])
 # def recipe_search():
 #     data = request.json
@@ -172,4 +245,3 @@ def get_calories():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
