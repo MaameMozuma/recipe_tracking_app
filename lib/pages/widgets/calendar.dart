@@ -67,6 +67,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.circular(10),
             ),
+            weekendDecoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(10),
+            ),
             defaultDecoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.rectangle,
