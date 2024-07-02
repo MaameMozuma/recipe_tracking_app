@@ -83,112 +83,114 @@ class _AllRecipesPagesState extends State<AllRecipesPages> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  hintText: 'Search for recipes...', // Placeholder text
-                  filled: true,
-                  fillColor: Colors.grey[200], // Grey background color
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none, // Remove the border
-                    borderRadius: BorderRadius.circular(8), // Rounded corners
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    hintText: 'Search for recipes...', // Placeholder text
+                    filled: true,
+                    fillColor: Colors.grey[200], // Grey background color
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none, // Remove the border
+                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Color.fromARGB(255, 120, 82, 174),
+                    ),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  prefixIcon: const Icon(
-                    Icons.search,
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Popular dishes',
+                  // textAlign: TextAlign.left,
+                  style: TextStyle(
                     color: Color.fromARGB(255, 120, 82, 174),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 19,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Popular dishes',
-                // textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: Color.fromARGB(255, 120, 82, 174),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 19,
+              const SizedBox(
+                height: 5,
+              ),
+              SizedBox(
+                height: 240,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 10, // Number of cards you want to display
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+                      child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RecipeDetail(),
+                              ),
+                            );
+                          },
+                          child: const RecipeCard()),
+                    );
+                  },
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 10, // Number of cards you want to display
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-                    child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RecipeDetail(),
-                            ),
-                          );
-                        },
-                        child: const RecipeCard()),
-                  );
-                },
+              const SizedBox(
+                height: 10,
               ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Recipes of the week',
-                // textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: Color.fromARGB(255, 120, 82, 174),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 19,
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Recipes of the week',
+                  // textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 120, 82, 174),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 19,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 10, // Number of cards you want to display
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-                    child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RecipeDetail(),
-                            ),
-                          );
-                        },
-                        child: const RecipeCard()),
-                  );
-                },
+              const SizedBox(
+                height: 5,
               ),
-            ),
-          ],
+              SizedBox(
+                height: 240,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 10, // Number of cards you want to display
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+                      child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RecipeDetail(),
+                              ),
+                            );
+                          },
+                          child: const RecipeCard()),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

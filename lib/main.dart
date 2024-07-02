@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:team_proj_leanne/pages/sub_pages/splash_screen.dart';
 //import 'package:team_proj_leanne/pages/sub_pages/add_meal.dart';
 //import 'package:team_proj_leanne/pages/sub_pages/edit_user.dart';
 import 'package:team_proj_leanne/pages/widgets/custom_bottom_nav_bar.dart';
@@ -14,11 +15,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         //body: EditUser(),
-        body: customBottomNavigationBar(initialPageIndex: 0)
+        body: SplashScreen(),
+        // body: customBottomNavigationBar(initialPageIndex: 0)
         //body: AddMealPage()
         //body: DisplayAllMeals()
       ),

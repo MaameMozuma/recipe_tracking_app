@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:team_proj_leanne/pages/sub_pages/my_profile.dart';
 import 'package:team_proj_leanne/pages/widgets/daily_stat_card.dart';
 import 'package:team_proj_leanne/pages/widgets/profile_card.dart';
 
@@ -35,7 +35,13 @@ class UserStatistics extends StatelessWidget {
                       ),
                       IconButton(
                         icon: const Icon(Icons.settings, color: Colors.black),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MyProfilePage()),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -135,7 +141,9 @@ class UserStatistics extends StatelessWidget {
               'Daily',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
             ),
-            SizedBox(height: 20,),
+            SizedBox(
+              height: 20,
+            ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Row(
@@ -145,30 +153,68 @@ class UserStatistics extends StatelessWidget {
                   Column(
                     children: [
                       DailyStatCard(),
-                      SizedBox(height: 10,),
-                      Text('40', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                      Text('steps', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.grey),)
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        '40',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      Text(
+                        'steps',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                            color: Colors.grey),
+                      )
                     ],
                   ),
                   Column(
                     children: [
                       DailyStatCard(),
-                      SizedBox(height: 10,),
-                      Text('3600', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                       SizedBox(
-                        width: 76,
-                        child: Text('Calories gained', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.grey),))
+                        height: 10,
+                      ),
+                      Text(
+                        '3600',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      SizedBox(
+                          width: 76,
+                          child: Text(
+                            'Calories gained',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                                color: Colors.grey),
+                          ))
                     ],
                   ),
                   Column(
                     // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       DailyStatCard(),
-                      SizedBox(height: 10,),
-                      Text('2400', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                       SizedBox(
-                        width: 76,
-                        child: Text('Calories burned', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.grey),))
+                        height: 10,
+                      ),
+                      Text(
+                        '2400',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      SizedBox(
+                          width: 76,
+                          child: Text(
+                            'Calories burned',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                                color: Colors.grey),
+                          ))
                     ],
                   ),
                 ],

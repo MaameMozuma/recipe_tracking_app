@@ -204,7 +204,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
               const SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
-                  // Handle button tap
+                  Navigator.pop(context);
                 },
                 child: Container(
                   width: double.infinity,
