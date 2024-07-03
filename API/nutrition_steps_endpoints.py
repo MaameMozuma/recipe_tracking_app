@@ -42,26 +42,7 @@ def get_nutrition_info():
     else:
         return jsonify({'error': 'Failed to retrieve nutrition information'}), response.status_code
 
-@app.route('/create_recipe', methods=['POST'])
-def create_recipe():
-    data = request.json
-    recipe_name = data.get('recipe_name')
-    ingredients = data.get('ingredients')
-    instructions = data.get('instructions')
-
-    if not recipe_name or not ingredients or not instructions:
-        return jsonify({'error': 'Missing recipe information'}), 400
-
-    recipe_ref = db.collection('recipes').document()
-    recipe_ref.set({
-        'recipe_name': recipe_name,
-        'ingredients': ingredients,
-        'instructions': instructions
-    })
-
-    return jsonify({'id': recipe_ref.id}), 201
-
-
+#MEALS
 @app.route('/add_meal', methods=['POST'])
 def create_meal():
     data = request.json
@@ -102,43 +83,50 @@ def create_meal():
 @app.route('/get_meal', methods=['POST'])
 def get_meal():
     data = request.json
-    user_doc_id = data.get('user_doc_id')
+    user_id = data.get('user_id')
     meal_name = data.get('meal_name')
 
-    if not meal_name or not user_doc_id:
+    if not user_id or not meal_name:
         return jsonify({'error': 'User ID and meal name are required'}), 400
 
-    # user_ref = db.collection('user').document(user_doc_id)
-    meals_ref = db.collection('meals').where('user_id', '==', user_doc_id).where('meal_name', '==', meal_name)
+    meals_ref = db.collection('meals').where('user_id', '==', user_id).where('meal_name', '==', meal_name)
     meals = meals_ref.stream()
 
     result = None
+    meals_list = [meal.to_dict() for meal in meals]
 
-    for meal in meals:
-        meal_data = meal.to_dict()
+    if not meals_list:
+        return jsonify({'error': 'Meal not found'}), 404
+
+    for meal_data in meals_list:
         ingredients = meal_data.get('ingredients', [])
         detailed_ingredients = []
         total_calories = 0
 
-        for ingredient in ingredients:
-            item = ingredient.get('item')
-            quantity = ingredient.get('quantity')
+        ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
 
-            if item:
-                headers = {
-                    'X-Api-Key': API_KEY
-                }
-                params = {
-                    'query': item
-                }
+        if ingredient_names:
+            headers = {
+                'X-Api-Key': API_KEY
+            }
+            params = {
+                'query': ', '.join(ingredient_names)
+            }
 
-                response = requests.get(CALORIE_URL, headers=headers, params=params)
-                if response.status_code == 200:
-                    nutrition_info = response.json()
-                    if nutrition_info['items']:
-                        calorie_info = nutrition_info['items'][0].get('calories', 0)
-                        detailed_ingredients.append({'item': item, 'calories': calorie_info})
-                        total_calories += calorie_info
+            response = requests.get(CALORIE_URL, headers=headers, params=params)
+            if response.status_code == 200:
+                nutrition_info = response.json()
+                items = nutrition_info.get('items', [])
+
+                for ingredient in ingredients:
+                    item_name = ingredient.get('item').lower()
+                    matching_item = next((item for item in items if item['name'].lower() == item_name), None)
+                    if matching_item:
+                        item_calories = matching_item.get('calories', 0)
+                    else:
+                        item_calories = 0
+                    detailed_ingredients.append({'item': ingredient.get('item'), 'calories': item_calories})
+                    total_calories += item_calories
 
         result = {
             'meal_name': meal_name,
@@ -148,12 +136,10 @@ def get_meal():
         }
         break
 
-    if not result:
-        return jsonify({'error': 'Meal not found'}), 404
-
     return jsonify(result), 200
 
 
+# RECIPES
 @app.route('/add_recipe', methods=['POST'])
 def add_recipe():
     data = request.json
@@ -174,69 +160,75 @@ def add_recipe():
     if not isinstance(steps, list) or not all(isinstance(i, dict) for i in steps):
         return jsonify({'error': 'Steps must be a list of dictionaries'}), 400
 
-    meal_ref = db.collection('recipes').document()
-    meal_data = {
+    recipe_ref = db.collection('recipes').document()
+    recipe_data = {
         'user_id': user_id,
-        'meal_name': recipe_name,
+        'recipe_name': recipe_name,
         'ingredients': ingredients,
         'steps': steps,
         'date': current_date
     }
 
-    meal_ref.set(meal_data)
+    recipe_ref.set(recipe_data)
 
-    return jsonify({'id': meal_ref.id}), 201
+    return jsonify({'id': recipe_ref.id}), 201
 
 @app.route('/get_recipe', methods=['POST'])
 def get_recipe():
     data = request.json
-    user_doc_id = data.get('user_doc_id')
+    user_id = data.get('user_id')
     recipe_name = data.get('recipe_name')
 
-    if not recipe_name or not user_doc_id:
-        return jsonify({'error': 'User ID and recipe name are required'}), 400
+    if not user_id or not recipe_name:
+        return jsonify({'error': 'User ID and meal name are required'}), 400
 
-    # user_ref = db.collection('user').document(user_doc_id)
-    meals_ref = db.collection('recipes').where('user_id', '==', user_doc_id).where('recipe_name', '==', recipe_name)
-    meals = meals_ref.stream()
+    recipe_ref = db.collection('recipes').where('user_id', '==', user_id).where('recipe_name', '==', recipe_name)
+    recipes = recipe_ref.stream()
 
     result = None
+    recipes_list = [recipe.to_dict() for recipe in recipes]
 
-    for meal in meals:
-        meal_data = meal.to_dict()
-        ingredients = meal_data.get('ingredients', [])
+    if not recipes_list:
+        return jsonify({'error': 'Recipe not found'}), 404
+
+    for recipe_data in recipes_list:
+        ingredients = recipe_data.get('ingredients', [])
         detailed_ingredients = []
+        steps = recipe_data.get('steps', [])
         total_calories = 0
 
-        for ingredient in ingredients:
-            item = ingredient.get('item')
-            quantity = ingredient.get('quantity')
+        ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
 
-            if item:
-                headers = {
-                    'X-Api-Key': API_KEY
-                }
-                params = {
-                    'query': item
-                }
+        if ingredient_names:
+            headers = {
+                'X-Api-Key': API_KEY
+            }
+            params = {
+                'query': ', '.join(ingredient_names)
+            }
 
-                response = requests.get(CALORIE_URL, headers=headers, params=params)
-                if response.status_code == 200:
-                    nutrition_info = response.json()
-                    if nutrition_info['items']:
-                        calorie_info = nutrition_info['items'][0].get('calories', 0)
-                        detailed_ingredients.append({'item': item, 'calories': calorie_info})
-                        total_calories += calorie_info
+            response = requests.get(CALORIE_URL, headers=headers, params=params)
+            if response.status_code == 200:
+                nutrition_info = response.json()
+                items = nutrition_info.get('items', [])
+
+                for ingredient in ingredients:
+                    item_name = ingredient.get('item').lower()
+                    matching_item = next((item for item in items if item['name'].lower() == item_name), None)
+                    if matching_item:
+                        item_calories = matching_item.get('calories', 0)
+                    else:
+                        item_calories = 0
+                    detailed_ingredients.append({'item': ingredient.get('item'), 'calories': item_calories})
+                    total_calories += item_calories
 
         result = {
-            'recipe_name': recipe_name,
-            'ingredients': detailed_ingredients,
-            'total_calories': total_calories
-        }
+                 'recipe_name': recipe_name,
+                 'ingredients': detailed_ingredients,
+                 'steps': steps,
+                 'total_calories': total_calories
+             }
         break
-
-    if not result:
-        return jsonify({'error': 'Recipe not found'}), 404
 
     return jsonify(result), 200
 
@@ -320,4 +312,3 @@ def get_calories():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
