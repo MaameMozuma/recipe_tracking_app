@@ -3,7 +3,7 @@ import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
 from flask import request, jsonify
-from __main__ import app
+from __main__ import app, db
 import os
 from dotenv import load_dotenv
 

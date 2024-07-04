@@ -112,7 +112,7 @@ def verify_otp():
     code = data.get('code')
 
     if not number or not code:
-        return jsonify({"error": "Phone number of Code are missing"}), 400
+        return jsonify({"error": "Phone number or Code are missing"}), 400
 
     response, status_code = h.verify_otp(number, code)
 
