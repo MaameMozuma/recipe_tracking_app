@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+users = db.collection("user")
 
 
 @app.route('/', methods=['POST'])
@@ -44,9 +45,10 @@ def get_nutrition_info():
 
 #MEALS
 @app.route('/add_meal', methods=['POST'])
+@jwt_required()
 def create_meal():
+    current_user = get_jwt_identity()
     data = request.json
-    user_id = data.get('user_id')
     meal_name = data.get('meal_name')
     ingredients = data.get('ingredients')
     image_url = data.get('image_url')
@@ -56,7 +58,7 @@ def create_meal():
 
     current_date = datetime.utcnow().strftime('%Y-%m-%d')
 
-    if not user_id or not meal_name or not ingredients:
+    if not current_user or not meal_name or not ingredients:
         return jsonify({'error': 'Missing meal information'}), 400
 
     # Check if ingredients is a list of dictionaries
@@ -65,7 +67,7 @@ def create_meal():
 
     meal_ref = db.collection('meals').document()
     meal_data = {
-        'user_id': user_id,
+        'user_id': current_user,
         'meal_name': meal_name,
         'ingredients': ingredients,
         'image_url': image_url,
@@ -79,17 +81,16 @@ def create_meal():
     return jsonify({'id': meal_ref.id}), 201
 
 
-#todo: send ingredients as one comma separated string
-@app.route('/get_meal', methods=['POST'])
+@app.route('/get_meal', methods=['GET'])
+@jwt_required()
 def get_meal():
-    data = request.json
-    user_id = data.get('user_id')
-    meal_name = data.get('meal_name')
+    current_user = get_jwt_identity()
+    meal_name = request.args.get('meal_name')
 
-    if not user_id or not meal_name:
+    if not current_user or not meal_name:
         return jsonify({'error': 'User ID and meal name are required'}), 400
 
-    meals_ref = db.collection('meals').where('user_id', '==', user_id).where('meal_name', '==', meal_name)
+    meals_ref = db.collection('meals').where('user_id', '==', current_user).where('meal_name', '==', meal_name)
     meals = meals_ref.stream()
 
     result = None
@@ -138,22 +139,22 @@ def get_meal():
 
     return jsonify(result), 200
 
-
 # RECIPES
 @app.route('/add_recipe', methods=['POST'])
+@jwt_required()
 def add_recipe():
+    current_user = get_jwt_identity()
     data = request.json
-    user_id = data.get('user_id')
     recipe_name = data.get('recipe_name')
     ingredients = data.get('ingredients')
     steps = data.get('steps')
 
     current_date = datetime.utcnow().strftime('%Y-%m-%d')
 
-    if not user_id or not recipe_name or not ingredients or not steps:
+    if not current_user or not recipe_name or not ingredients or not steps:
         return jsonify({'error': 'Missing meal information'}), 400
 
-    # Check if ingredients is a list of dictionaries
+
     if not isinstance(ingredients, list) or not all(isinstance(i, dict) for i in ingredients):
         return jsonify({'error': 'Ingredients must be a list of dictionaries'}), 400
 
@@ -162,7 +163,7 @@ def add_recipe():
 
     recipe_ref = db.collection('recipes').document()
     recipe_data = {
-        'user_id': user_id,
+        'user_id': current_user,
         'recipe_name': recipe_name,
         'ingredients': ingredients,
         'steps': steps,
@@ -173,16 +174,16 @@ def add_recipe():
 
     return jsonify({'id': recipe_ref.id}), 201
 
-@app.route('/get_recipe', methods=['POST'])
+@app.route('/get_recipe', methods=['GET'])
+@jwt_required()
 def get_recipe():
-    data = request.json
-    user_id = data.get('user_id')
-    recipe_name = data.get('recipe_name')
+    current_user = get_jwt_identity()
+    recipe_name = request.args.get('recipe_name')
 
-    if not user_id or not recipe_name:
-        return jsonify({'error': 'User ID and meal name are required'}), 400
+    if not current_user or not recipe_name:
+        return jsonify({'error': 'User ID and recipe name are required'}), 400
 
-    recipe_ref = db.collection('recipes').where('user_id', '==', user_id).where('recipe_name', '==', recipe_name)
+    recipe_ref = db.collection('recipes').where('user_id', '==', current_user).where('recipe_name', '==', recipe_name)
     recipes = recipe_ref.stream()
 
     result = None
@@ -223,11 +224,11 @@ def get_recipe():
                     total_calories += item_calories
 
         result = {
-                 'recipe_name': recipe_name,
-                 'ingredients': detailed_ingredients,
-                 'steps': steps,
-                 'total_calories': total_calories
-             }
+            'recipe_name': recipe_name,
+            'ingredients': detailed_ingredients,
+            'steps': steps,
+            'total_calories': total_calories
+        }
         break
 
     return jsonify(result), 200
@@ -281,32 +282,6 @@ def get_calories():
         return jsonify({'calories': calories}), 200
     else:
         return jsonify({'error': 'No steps data found for the specified date'}), 404
-
-
-
-
-# @app.route('/recipe_search', methods=['POST'])
-# def recipe_search():
-#     data = request.json
-#     recipe_name = data.get('recipe_name')
-#
-#     if not recipe_name:
-#         return jsonify({'error': 'No recipe name provided'}), 400
-#
-#     headers = {
-#         'X-Api-Key': API_KEY
-#     }
-#     recipe_params = {
-#         'query': recipe_name
-#     }
-#
-#     recipe_response = requests.get(RECIPE_URL, headers=headers, params=recipe_params)
-#
-#     if recipe_response.status_code == 200:
-#         return jsonify(recipe_response.json()), 200
-#     else:
-#         print(recipe_response.content)  # Debugging: print the response content
-#         return jsonify({'error': 'Failed to retrieve recipe information'}), recipe_response.status_code
 
 
 
