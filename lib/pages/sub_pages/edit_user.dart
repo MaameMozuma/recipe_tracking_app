@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '/pages/widgets/custom_btn.dartrt';
+import '/pages/widgets/custom_btn.dart';
 import '/pages/widgets/header.dart';
 import '/pages/widgets/text_field.dart';
 

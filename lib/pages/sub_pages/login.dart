@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_proj_leanne/pages/widgets/custom_bottom_nav_bar.dart';
 import 'package:team_proj_leanne/pages/widgets/form_buttons.dart';
 import 'package:team_proj_leanne/pages/widgets/form_field.dart';
@@ -16,20 +15,20 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final myEmailController = TextEditingController();
+  final myUsernameController = TextEditingController();
   final myPasswordController = TextEditingController();
 
   @override
   void dispose() {
-    myEmailController.dispose();
+    myUsernameController.dispose();
     myPasswordController.dispose();
     super.dispose();
   }
 
   Future<bool> submitData() async {
-    Future<bool> created =
-        loginUser(myEmailController.text, myPasswordController.text);
-    return created;
+    Future<bool> status =
+        loginUser(myUsernameController.text, myPasswordController.text);
+    return status;
   }
 
   @override
@@ -92,8 +91,8 @@ class LoginPageState extends State<LoginPage> {
                                 FontSize: 15,
                                 Width: pageWidth * 0.87,
                                 Height: pageHeight * 0.07,
-                                Placeholder: 'Email',
-                                Controller: myEmailController,
+                                Placeholder: 'Username',
+                                Controller: myUsernameController,
                                 ObscureDetail: false,
                               )),
                           Padding(

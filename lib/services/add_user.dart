@@ -2,22 +2,15 @@ import 'package:http/http.dart' as http;
 
 String baseUrl = 'http://127.0.0.1:5000';
 
-Future<bool> addUser(
-    String firstName,
-    String lastName,
-    String email,
-    String contactNumber,
-    String password,
-    double height,
-    double weight,
-    String DOB) async {
+Future<bool> addUser(String username, String email, String contactNumber,
+    String password, String height, String weight, String DOB) async {
   bool success = false;
   final response = await http.post(Uri.parse(baseUrl + '/signup'), headers: {
     'Accept': '*/*',
     'Content-Type': 'application/json'
   }, body: {
     {
-      "username": '$firstName$lastName',
+      "username": username,
       "email": email,
       "password": password,
       "height": height,
