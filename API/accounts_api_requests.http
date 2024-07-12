@@ -2,6 +2,21 @@
 POST http://127.0.0.1:5000/login
 Content-Type: application/json
 
+{
+  "username" : "Admin3",
+  "password" : "admineasy12#"
+}
+
+
+### live
+POST https://nutripalapi-kysmz47f4q-ew.a.run.app/login
+Content-Type: application/json
+
+{
+  "username" : "Admin3",
+  "password" : "admineasy12#"
+}
+
 ### Signup
 POST http://127.0.0.1:5000/signup
 Content-Type: application/json
@@ -42,3 +57,20 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsI
   "steps" : 10000,
   "calories" : 1800
 }
+
+### Update a user profile
+PATCH http://127.0.0.1:5000/update_account
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMDgyNDU0OSwianRpIjoiM2U1YTY5MTQtZGM3Ni00ODllLWFkMTctODg1NGEwOTBkYTcyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IkFkbWluMyIsIm5iZiI6MTcyMDgyNDU0OSwiY3NyZiI6ImE3NjA5MzcxLWE1OGYtNDI1Ny04NzQ5LTMzMGFlNDU3M2VhOSIsImV4cCI6MTcyMDgyNTQ0OX0.3uHEYu_T-EV_vGX6RudV_ISUbzcs7-pwOdkX-aJ4Jmo
+
+{
+  "height" : "200",
+  "weight" : "89",
+  "phone_number" : "233556207957"
+}
+
+
+### Get a user profile
+GET http://127.0.0.1:5000/view_account
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMDgyNDU0OSwianRpIjoiM2U1YTY5MTQtZGM3Ni00ODllLWFkMTctODg1NGEwOTBkYTcyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IkFkbWluMyIsIm5iZiI6MTcyMDgyNDU0OSwiY3NyZiI6ImE3NjA5MzcxLWE1OGYtNDI1Ny04NzQ5LTMzMGFlNDU3M2VhOSIsImV4cCI6MTcyMDgyNTQ0OX0.3uHEYu_T-EV_vGX6RudV_ISUbzcs7-pwOdkX-aJ4Jmo

@@ -6,6 +6,7 @@ from flask import request, jsonify
 from __main__ import app, db
 import os
 from dotenv import load_dotenv
+from flask_jwt_extended import jwt_required
 
 load_dotenv()
 

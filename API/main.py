@@ -79,13 +79,55 @@ def signup():
 
 
 @app.route('/view_account', methods=['GET'])
-def view_profile():
+@jwt_required()
+def view_account():
+    current_user = get_jwt_identity()
 
-    return
+    # Get user document
+    user_ref = users.document(current_user)
+    user_doc = user_ref.get()
 
-@app.route('/update_profile', methods=['PATCH'])
-def update_profile():
-    return
+    if user_doc.exists:
+        user_data = user_doc.to_dict()
+        response = {
+            "username": user_data.get("username", ""),
+            "email": user_data.get("email", ""),
+            "height": user_data.get("height", ""),
+            "weight": user_data.get("weight", ""),
+            "dob": user_data.get("dob", ""),
+            "phone_number": user_data.get("phone_number", "")
+        }
+        return jsonify(response), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+
+@app.route('/update_account', methods=['PATCH'])
+@jwt_required()
+def update_account():
+    current_user = get_jwt_identity()
+    data = request.get_json()
+
+    #Validate update fields
+    if not h.validate_update_fields(request):
+        return jsonify({"error":"One or more of the update fields is invalid"}), 400
+
+    # Get user document
+    user_ref = users.document(current_user)
+    user_doc = user_ref.get()
+
+    if user_doc.exists:
+        # Update the user document
+        user_ref.update({
+            "phone_number": data.get("phone_number"),
+            "height": data.get("height"),
+            "weight": data.get("weight")
+        })
+        return jsonify({"message": "Profile updated successfully"}), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+
+
+
 
 @app.route('/send_otp', methods=['GET'])
 def send_otp():

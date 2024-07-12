@@ -216,4 +216,34 @@ def verify_and_return_goals(request):
     return True, data
 
 
+def validate_update_fields(request):
+    """Validates sign up fields to ensure that the data entered
+    is valid"""
+
+    data = request.get_json()
+    height = float(data['height'])
+    weight = float(data['weight'])
+    number = data['phone_number']
+
+    # check height
+    if height >= 215 or height <= 60:
+        return False
+
+    # check weight
+    if weight >= 200 or weight <=30:
+        return False
+
+    # check number
+    if len(number) >= 13 or len(number) <10:
+        return False
+
+    return True
+
+
+
+
+
+    # check phone number
+
+
 
