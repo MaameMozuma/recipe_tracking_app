@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:team_proj_leanne/pages/widgets/text_field.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:team_proj_leanne/pages/widgets/custom_btn.dart';
-import 'package:path/path.dart' as path;
 import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+
+import '/pages/widgets/custom_btn.dart';
+import '/pages/widgets/text_field.dart';
 
 class AddMealPage extends StatefulWidget {
   const AddMealPage({super.key});
@@ -252,53 +254,52 @@ class _AddMealPageState extends State<AddMealPage> {
                         const SizedBox(height: 30),
                       ],
                     ),
-                    GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color:
-                                      const Color.fromRGBO(120, 82, 174, 1.0)),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            height: 70,
-                            width: double.infinity,
-                            child: _foodImage == null
-                                ? const Padding(
-                                    padding: EdgeInsets.all(20.0),
-                                    child: Text('Choose Picture'),
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Row(
-                                      children: [
-                                        Image.file(
-                                          _foodImage!,
-                                          fit: BoxFit.cover,
-                                          width: 50,
-                                          height: 50,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            path.basename(_foodImage!.path),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: const Color.fromRGBO(120, 82, 174, 1.0)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      height: 70,
+                      width: double.infinity,
+                      child: _foodImage == null
+                          ? const Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: Text('Choose Picture'),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  Image.file(
+                                    _foodImage!,
+                                    fit: BoxFit.cover,
+                                    width: 50,
+                                    height: 50,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      path.basename(_foodImage!.path),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        SizedBox(
-                          height: 70,
-                          child: CustomBtn(
-                              text: 'Save',
-                              onPressed: () {
-                                Navigator.pop(context);
-                              }),
-                        ),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  SizedBox(
+                    height: 70,
+                    child: CustomBtn(
+                        text: 'Save',
+                        onPressed: () {
+                          Navigator.pop(context);
+                        }),
+                  ),
                 ],
               ),
             )

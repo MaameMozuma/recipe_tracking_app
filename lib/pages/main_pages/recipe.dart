@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:team_proj_leanne/pages/sub_pages/create_recipe.dart';
-import 'package:team_proj_leanne/pages/sub_pages/recipe_detail.dart';
-import 'package:team_proj_leanne/pages/widgets/recipe_card.dart';
+
+import '/pages/sub_pages/create_recipe.dart';
+import '/pages/sub_pages/recipe_detail.dart';
+import '/pages/widgets/recipe_card.dart';
 
 class AllRecipesPages extends StatefulWidget {
   const AllRecipesPages({super.key});
@@ -41,8 +41,8 @@ class _AllRecipesPagesState extends State<AllRecipesPages> {
                       ),
                       Text(
                         'Samuel Blankson',
-                        style:
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
                       ),
                     ],
                   ),
@@ -100,8 +100,8 @@ class _AllRecipesPagesState extends State<AllRecipesPages> {
                       borderSide: BorderSide.none, // Remove the border
                       borderRadius: BorderRadius.circular(8), // Rounded corners
                     ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     prefixIcon: const Icon(
                       Icons.search,
                       color: Color.fromARGB(255, 120, 82, 174),

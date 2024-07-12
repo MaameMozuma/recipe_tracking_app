@@ -1,17 +1,16 @@
 import 'package:http/http.dart' as http;
 
-Future<bool> loginUser(String email, String password) async {
-  bool success = false;
-  final response = await http.post(
-      Uri.parse(
-          'https://apps.ashesi.edu.gh/contactmgt/actions/add_contact_mob'),
-      //headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
-      body: {});
+String baseUrl = 'http://127.0.0.1:5000';
+
+Future<String?> loginUser(String username, String password) async {
+  final response = await http.post(Uri.parse('baseUrl' + '/login'),
+      headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
+      body: {"username": username, "password": password});
   if (response.statusCode != 200) {
-    throw Exception('Failed to post data');
+    throw Exception('Failed to Login');
   }
   if (response.statusCode == 200) {
-    success = true;
+    String access_token = response.body;
+    return access_token;
   }
-  return success;
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:team_proj_leanne/pages/sub_pages/user_statistics.dart';
-import 'package:team_proj_leanne/pages/widgets/circle_avatar.dart';
-import 'package:team_proj_leanne/pages/widgets/progress_card.dart';
+
+import '/pages/sub_pages/user_statistics.dart';
+import '/pages/widgets/circle_avatar.dart';
+import '/pages/widgets/progress_card.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -50,8 +50,8 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       Text(
                         'Samuel Blankson',
-                        style:
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
                       ),
                     ],
                   ),
