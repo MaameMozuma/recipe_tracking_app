@@ -9,7 +9,7 @@ Content-Type: application/json
 
 
 ### live
-POST https://nutripalapi-kysmz47f4q-ew.a.run.app/login
+POST https://us-central1-mobiledev-428400.cloudfunctions.net/nutripal_live1/login
 Content-Type: application/json
 
 {

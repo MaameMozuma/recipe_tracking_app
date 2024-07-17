@@ -1,17 +1,14 @@
-from flask import Flask, request, jsonify
-import requests
-import firebase_admin
-from firebase_admin import credentials, firestore
 from flask import request, jsonify
-from __main__ import app, db
+from api_config import app, db
 import os
 from dotenv import load_dotenv
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
+import helpers as h
 
 load_dotenv()
 
-
 users = db.collection("user")
+
 
 
 @app.route('/', methods=['POST'])

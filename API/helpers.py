@@ -1,19 +1,15 @@
 import json
-import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials
 import os
 import hashlib
 import requests
 from dotenv import load_dotenv
-from flask import jsonify
+
 import re
 
 # Setup collections
 load_dotenv()
 cred = credentials.Certificate(os.getenv("firebase_cred"))
-
-
-
 
 
 def valid_login_fields(request):
@@ -243,7 +239,6 @@ def validate_update_fields(request):
 
 
 
-    # check phone number
 
 
 
