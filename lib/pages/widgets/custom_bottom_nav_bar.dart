@@ -31,6 +31,7 @@ class _customBottomNavigationBar extends State<customBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       body: screens[currentPage],
       bottomNavigationBar: Container(
         //height: 80, // Adjust the height as per your preference
