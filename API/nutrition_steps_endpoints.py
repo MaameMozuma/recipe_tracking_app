@@ -137,6 +137,100 @@ def get_meal():
 
     return jsonify(result), 200
 
+@app.route('/get_all_meals', methods=['GET'])
+def get_all_meals():
+    meals_ref = db.collection('meals')
+    meals = meals_ref.stream()
+
+    result = []
+    for meal in meals:
+        meal_data = meal.to_dict()
+        ingredients = meal_data.get('ingredients', [])
+        detailed_ingredients = []
+        total_calories = 0
+
+        ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
+
+        if ingredient_names:
+            headers = {
+                'X-Api-Key': API_KEY
+            }
+            params = {
+                'query': ', '.join(ingredient_names)
+            }
+
+            response = requests.get(CALORIE_URL, headers=headers, params=params)
+            if response.status_code == 200:
+                nutrition_info = response.json()
+                items = nutrition_info.get('items', [])
+
+                for ingredient in ingredients:
+                    item_name = ingredient.get('item').lower()
+                    matching_item = next((item for item in items if item['name'].lower() == item_name), None)
+                    if matching_item:
+                        item_calories = matching_item.get('calories', 0)
+                    else:
+                        item_calories = 0
+                    detailed_ingredients.append({'item': ingredient.get('item'), 'calories': item_calories})
+                    total_calories += item_calories
+
+        result.append({
+            'meal_name': meal_data.get('meal_name'),
+            'image_url': meal_data.get('image_url'),
+            'ingredients': detailed_ingredients,
+            'total_calories': total_calories
+        })
+
+    return jsonify(result), 200
+
+@app.route('/get_all_user_meals', methods=['GET'])
+@jwt_required()
+def get_all_user_meals():
+    current_user = get_jwt_identity()
+    meals_ref = db.collection('meals').where('user_id', '==', current_user)
+    meals = meals_ref.stream()
+
+    result = []
+    for meal in meals:
+        meal_data = meal.to_dict()
+        ingredients = meal_data.get('ingredients', [])
+        detailed_ingredients = []
+        total_calories = 0
+
+        ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
+
+        if ingredient_names:
+            headers = {
+                'X-Api-Key': API_KEY
+            }
+            params = {
+                'query': ', '.join(ingredient_names)
+            }
+
+            response = requests.get(CALORIE_URL, headers=headers, params=params)
+            if response.status_code == 200:
+                nutrition_info = response.json()
+                items = nutrition_info.get('items', [])
+
+                for ingredient in ingredients:
+                    item_name = ingredient.get('item').lower()
+                    matching_item = next((item for item in items if item['name'].lower() == item_name), None)
+                    if matching_item:
+                        item_calories = matching_item.get('calories', 0)
+                    else:
+                        item_calories = 0
+                    detailed_ingredients.append({'item': ingredient.get('item'), 'calories': item_calories})
+                    total_calories += item_calories
+
+        result.append({
+            'meal_name': meal_data.get('meal_name'),
+            'image_url': meal_data.get('image_url'),
+            'ingredients': detailed_ingredients,
+            'total_calories': total_calories
+        })
+
+    return jsonify(result), 200
+
 # RECIPES
 @app.route('/add_recipe', methods=['POST'])
 @jwt_required()
