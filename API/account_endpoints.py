@@ -1,31 +1,14 @@
-from flask import Flask, request, jsonify
-import requests
-import firebase_admin
-from firebase_admin import credentials, firestore
-import json
+from flask import request, jsonify
+from api_config import app, db
+import os
+from dotenv import load_dotenv
+from flask_jwt_extended import get_jwt_identity, jwt_required, create_access_token
 import helpers as h
+from datetime import timedelta
 
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import get_jwt_identity
-from flask_jwt_extended import jwt_required
-from flask_jwt_extended import JWTManager
+load_dotenv()
 
-
-## Initialize Credentials & DB
-cred = credentials.Certificate("mobiledev-f3a76-firebase-adminsdk-jzpgs-1bcbed5027.json")
-firebase_admin.initialize_app(cred)
-db = firestore.client()
-
-
-## Initialize flask app & JWT
-app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = "0a65sd1a6wlkncd[a0 s9y][q-09ej"
-jwt = JWTManager(app)
 users = db.collection("user")
-
-## Impotrt other endpoints
-import usergoals_endpoints
-import nutrition_steps_endpoints
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -35,7 +18,8 @@ def login():
     if h.valid_login_fields(request) and h.verified_credentials(users, request):
         username = request.json.get("username", None)
         print(username)
-        access_token = create_access_token(username)
+        expires = timedelta(days=30)
+        access_token = create_access_token(username, expires_delta=expires)
 
         return jsonify(access_token = access_token), 200
 
@@ -79,13 +63,55 @@ def signup():
 
 
 @app.route('/view_account', methods=['GET'])
-def view_profile():
+@jwt_required()
+def view_account():
+    current_user = get_jwt_identity()
 
-    return
+    # Get user document
+    user_ref = users.document(current_user)
+    user_doc = user_ref.get()
 
-@app.route('/update_profile', methods=['PATCH'])
-def update_profile():
-    return
+    if user_doc.exists:
+        user_data = user_doc.to_dict()
+        response = {
+            "username": user_data.get("username", ""),
+            "email": user_data.get("email", ""),
+            "height": user_data.get("height", ""),
+            "weight": user_data.get("weight", ""),
+            "dob": user_data.get("dob", ""),
+            "phone_number": user_data.get("phone_number", "")
+        }
+        return jsonify(response), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+
+@app.route('/update_account', methods=['PATCH'])
+@jwt_required()
+def update_account():
+    current_user = get_jwt_identity()
+    data = request.get_json()
+
+    #Validate update fields
+    if not h.validate_update_fields(request):
+        return jsonify({"error":"One or more of the update fields is invalid"}), 400
+
+    # Get user document
+    user_ref = users.document(current_user)
+    user_doc = user_ref.get()
+
+    if user_doc.exists:
+        # Update the user document
+        user_ref.update({
+            "phone_number": data.get("phone_number"),
+            "height": data.get("height"),
+            "weight": data.get("weight")
+        })
+        return jsonify({"message": "Profile updated successfully"}), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+
+
+
 
 @app.route('/send_otp', methods=['GET'])
 def send_otp():
@@ -117,10 +143,3 @@ def verify_otp():
     response, status_code = h.verify_otp(number, code)
 
     return jsonify(response), status_code
-
-
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
