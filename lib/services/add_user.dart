@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 
-String baseUrl = 'http://127.0.0.1:5000';
+String baseUrl =
+    'https://us-central1-mobiledev-428400.cloudfunctions.net/nutripal_live1';
 
 Future<bool> addUser(String username, String email, String contactNumber,
     String password, String height, String weight, String DOB) async {

@@ -21,7 +21,7 @@ class UserProfile {
       'height': height,
       'weight': weight,
       'dob': dob,
-      'telno': telno,
+      'phone_number': telno,
       'email': email,
       'username': username,
     };
@@ -30,7 +30,7 @@ class UserProfile {
   factory UserProfile.fromMap(Map<String, dynamic> map) {
     return UserProfile(
       username: map['username'] ?? '',
-      telno: map['telno'] ?? '',
+      telno: map['phone_number'] ?? '',
       email: map['email'] ?? '',
       height: map['height'] ?? '',
       weight: map['weight'] ?? '',
@@ -40,7 +40,7 @@ class UserProfile {
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      telno: json['telno'],
+      telno: json['phone_number'],
       email: json['email'],
       height: json['height'],
       weight: json['weight'],

@@ -1,7 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-String baseUrl = 'http://127.0.0.1:5000';
+String baseUrl =
+    'https://us-central1-mobiledev-428400.cloudfunctions.net/nutripal_live1';
 
 Future<bool> loginUser(String username, String password) async {
   bool success = false;
