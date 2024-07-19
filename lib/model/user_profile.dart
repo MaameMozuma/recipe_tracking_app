@@ -1,51 +1,52 @@
 import 'dart:convert';
 
 class UserProfile {
-  final String uid;
-  final String ufname;
-  final String ulname;
+  final String username;
+  final String height;
+  final String weight;
+  final String dob;
   final String telno;
-  final String address;
   final String email;
 
   UserProfile(
-      {required this.uid,
-      required this.ufname,
-      required this.ulname,
+      {required this.weight,
+      required this.username,
+      required this.height,
       required this.telno,
-      required this.address,
+      required this.dob,
       required this.email});
 
   Map<String, dynamic> toMap() {
     return {
-      'uid': uid,
-      'ufname': ufname,
-      'ulname': ulname,
+      'height': height,
+      'weight': weight,
+      'dob': dob,
       'telno': telno,
-      'address': address,
-      'email': email
+      'email': email,
+      'username': username,
     };
   }
 
   factory UserProfile.fromMap(Map<String, dynamic> map) {
     return UserProfile(
-      uid: map['uid'] ?? '',
-      ufname: map['ufname'] ?? '',
-      ulname: map['ulname'] ?? '',
+      username: map['username'] ?? '',
       telno: map['telno'] ?? '',
-      address: map['address'] ?? '',
       email: map['email'] ?? '',
+      height: map['height'] ?? '',
+      weight: map['weight'] ?? '',
+      dob: map['dob'] ?? '',
     );
   }
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-        uid: json['uid'],
-        ufname: json['ufname'],
-        ulname: json['ulname'],
-        telno: json['telno'],
-        address: json['address'],
-        email: json['email']);
+      telno: json['telno'],
+      email: json['email'],
+      height: json['height'],
+      weight: json['weight'],
+      dob: json['dob'],
+      username: json['username'],
+    );
   }
 
   String toJson() => json.encode(toMap());

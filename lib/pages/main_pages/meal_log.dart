@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:team_proj_leanne/pages/widgets/calendar.dart';
-import 'package:team_proj_leanne/pages/widgets/search.dart';
-import 'package:team_proj_leanne/pages/widgets/meal_card.dart';
-import 'package:team_proj_leanne/pages/sub_pages/add_meal.dart';
-import 'package:team_proj_leanne/model/meal.dart';
-import 'package:team_proj_leanne/pages/sub_pages/view_all_meals.dart';
+
+import '/model/meal.dart';
+import '/pages/sub_pages/add_meal.dart';
+import '/pages/sub_pages/view_all_meals.dart';
+import '/pages/widgets/calendar.dart';
+import '/pages/widgets/meal_card.dart';
+import '/pages/widgets/search.dart';
 
 class MealLogPage extends StatefulWidget {
   const MealLogPage({super.key});
@@ -79,9 +80,13 @@ class _MealLogPageState extends State<MealLogPage> {
               size: 40,
             ),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => const AddMealPage(), // Replace with your destination page
-                        ),);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const AddMealPage(), // Replace with your destination page
+                ),
+              );
               // Navigate to the add meal page
             },
           ),
@@ -138,9 +143,13 @@ class _MealLogPageState extends State<MealLogPage> {
                         alignment: Alignment.topRight,
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => const DisplayAllMeals(), // Replace with your destination page
-                        ),);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const DisplayAllMeals(), // Replace with your destination page
+                              ),
+                            );
                           },
                           child: const Text(
                             'View All',
