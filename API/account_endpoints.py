@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from flask_jwt_extended import get_jwt_identity, jwt_required, create_access_token
 import helpers as h
+from datetime import timedelta
 
 load_dotenv()
 
@@ -17,7 +18,8 @@ def login():
     if h.valid_login_fields(request) and h.verified_credentials(users, request):
         username = request.json.get("username", None)
         print(username)
-        access_token = create_access_token(username)
+        expires = timedelta(days=30)
+        access_token = create_access_token(username, expires_delta=expires)
 
         return jsonify(access_token = access_token), 200
 
