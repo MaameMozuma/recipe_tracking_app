@@ -176,6 +176,7 @@ def get_all_meals():
                     total_calories += item_calories
 
         result.append({
+            'meal_id': meal.id,
             'meal_name': meal_data.get('meal_name'),
             'image_url': meal_data.get('image_url'),
             'ingredients': detailed_ingredients,
@@ -224,6 +225,7 @@ def get_all_user_meals():
                     total_calories += item_calories
 
         result.append({
+            'meal_id': meal.id,
             'meal_name': meal_data.get('meal_name'),
             'image_url': meal_data.get('image_url'),
             'ingredients': detailed_ingredients,
@@ -417,6 +419,7 @@ def get_all_recipes():
                     total_calories += item_calories
 
         result.append({
+            'recipe_id': recipe.id,
             'recipe_name': recipe_data.get('recipe_name'),
             'ingredients': detailed_ingredients,
             'steps': steps,
@@ -466,6 +469,7 @@ def get_all_user_recipes():
                     total_calories += item_calories
 
         result.append({
+            'recipe_id': recipe.id,
             'recipe_name': recipe_data.get('recipe_name'),
             'ingredients': detailed_ingredients,
             'steps': steps,
@@ -573,6 +577,7 @@ def get_calories():
         return jsonify({'calories': calories}), 200
     else:
         return jsonify({'error': 'No steps data found for the specified date'}), 404
+
 
 
 if __name__ == "__main__":
