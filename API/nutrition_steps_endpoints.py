@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from flask_jwt_extended import get_jwt_identity, jwt_required
 import helpers as h
+import requests
 
 load_dotenv()
 
