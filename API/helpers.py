@@ -17,7 +17,7 @@ def valid_login_fields(request):
     only the required fields"""
 
     data = request.get_json()
-    necessary_fields = ['username','password']
+    necessary_fields = ['username','password','fcmtoken']
 
     for element in data:
         if element not in necessary_fields:
@@ -46,7 +46,7 @@ def valid_signup_fields(request):
 
     data = request.get_json()
     necessary_fields = ['username', 'password', 'email', 'height', 'dob', 'weight',
-                        'phone_number']
+                        'phone_number', 'fcmtoken']
 
     # check num of fields is correct
     if len(data) != len(necessary_fields):
@@ -133,6 +133,7 @@ def clean_signup_fields(request):
                     'height' : data.get('height').strip(),
                     'dob' : data.get('dob'),
                     'weight' : data.get('weight'),
+                    'fcmtoken' : data.get('fcmtoken')
                     }
 
     return cleaned_data
