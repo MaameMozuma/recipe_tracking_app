@@ -44,5 +44,8 @@ app.*.map.json
 
 /API/mobiledev-f3a76-firebase-adminsdk-jzpgs-1bcbed5027.json
 .env
+firebase.json
+google-services.json
+/lib/firebase_options.dart
 
 

@@ -5,37 +5,35 @@ class FormButton extends StatelessWidget {
   final double width;
   final String content;
   final dynamic route;
+  final dynamic action;
   FormButton({
     required this.height,
     required this.width,
     required this.content,
-    required this.route,
+    this.route,
+    this.action,
   });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        //Navigator.of(context).pop();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => route),
-        );
-      },
       style: ButtonStyle(
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0))),
-        fixedSize: MaterialStateProperty.all<Size>(
+        fixedSize: WidgetStateProperty.all<Size>(
             Size(width, height)), // Button width and height
-        backgroundColor: MaterialStateProperty.resolveWith<Color>(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.pressed)) {
+        backgroundColor: WidgetStateProperty.resolveWith<Color>(
+          (Set<WidgetState> states) {
+            if (states.contains(WidgetState.pressed)) {
               return Colors.transparent;
             }
             return const Color.fromRGBO(230, 230, 250, 1);
           },
         ),
       ),
+      onPressed: () {
+        action();
+      },
       child: Text(
         content,
         style: const TextStyle(
