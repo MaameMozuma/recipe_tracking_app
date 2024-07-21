@@ -79,9 +79,10 @@ def view_account():
             "height": user_data.get("height", ""),
             "weight": user_data.get("weight", ""),
             "dob": user_data.get("dob", ""),
-            "phone_number": user_data.get("phone_number", "")
+            "telno": user_data.get("phone_number", "")
         }
         return jsonify(response), 200
+
     else:
         return jsonify({"error": "User not found"}), 404
 

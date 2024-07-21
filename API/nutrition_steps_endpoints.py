@@ -1,10 +1,11 @@
 from flask import request, jsonify
-from api_config import app, db
+from api_config import app, db, bucket
 import os
 from dotenv import load_dotenv
 from flask_jwt_extended import get_jwt_identity, jwt_required
 import helpers as h
 import requests
+from datetime import datetime, date
 
 load_dotenv()
 
@@ -380,8 +381,77 @@ def get_recipe():
 
     return jsonify(result), 200
 
+
+@app.route('/recipes/<recipe_id>', methods=['GET'])
+@jwt_required()
+def get_recipe_by_id(recipe_id):
+    current_user = get_jwt_identity()
+    if not recipe_id:
+        return jsonify({'error': 'Recipe ID is required'}), 400
+
+    # Query Firestore for the recipe by ID
+    doc_ref = db.collection('recipes').document(recipe_id)
+    doc = doc_ref.get()
+
+    if not doc.exists:
+        return jsonify({'error': 'Recipe not found'}), 404
+
+    recipe_data = doc.to_dict()
+    
+    # if recipe_data.get('user_id') != current_user:
+    #     return jsonify({'error': 'Unauthorized access'}), 403
+
+    ingredients = recipe_data.get('ingredients', [])
+    detailed_ingredients = []
+    duration = recipe_data.get('duration', None)
+    details = recipe_data.get('details', None)
+    steps = recipe_data.get('steps', [])
+    user_id = recipe_data.get('user_id', None)
+    total_calories = 0
+
+    ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
+
+    if ingredient_names:
+        headers = {
+            'X-Api-Key': API_KEY
+        }
+        params = {
+            'query': ', '.join(ingredient_names)
+        }
+
+        response = requests.get(CALORIE_URL, headers=headers, params=params)
+        if response.status_code == 200:
+            nutrition_info = response.json()
+            items = nutrition_info.get('items', [])
+
+            for ingredient in ingredients:
+                item_name = ingredient.get('item').lower()
+                matching_item = next((item for item in items if item['name'].lower() == item_name), None)
+                if matching_item:
+                    item_calories = matching_item.get('calories', 0)
+                else:
+                    item_calories = 0
+                detailed_ingredients.append({'item': ingredient.get('item'), 'quantity': ingredient.get('quantity'), 'calories': item_calories})
+                total_calories += item_calories
+
+    result = {
+        'recipe_id': recipe_id,
+        'recipe_name': recipe_data.get('recipe_name', ''),
+        'ingredients': detailed_ingredients,
+        'details': details,
+        'duration': duration,
+        'steps': steps,
+        'total_calories': total_calories,
+        'user_recipe': True if user_id == current_user else False,
+    }
+
+    return jsonify(result), 200
+
+
 @app.route('/get_all_recipes', methods=['GET'])
+@jwt_required()
 def get_all_recipes():
+    current_user = get_jwt_identity()
     recipes_ref = db.collection('recipes')
     recipes = recipes_ref.stream()
 
@@ -389,8 +459,11 @@ def get_all_recipes():
     for recipe in recipes:
         recipe_data = recipe.to_dict()
         ingredients = recipe_data.get('ingredients', [])
+        details = recipe_data.get('details', None)
+        duration = recipe_data.get('duration', None)
         detailed_ingredients = []
         steps = recipe_data.get('steps', [])
+        user_id = recipe_data.get('user_id', None)
         total_calories = 0
 
         ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
@@ -415,15 +488,18 @@ def get_all_recipes():
                         item_calories = matching_item.get('calories', 0)
                     else:
                         item_calories = 0
-                    detailed_ingredients.append({'item': ingredient.get('item'), 'calories': item_calories})
+                    detailed_ingredients.append({'item': ingredient.get('item'), 'quantity': ingredient.get('quantity'), 'calories': item_calories})
                     total_calories += item_calories
 
         result.append({
             'recipe_id': recipe.id,
             'recipe_name': recipe_data.get('recipe_name'),
+            'details': details,
             'ingredients': detailed_ingredients,
             'steps': steps,
-            'total_calories': total_calories
+            'total_calories': total_calories,
+            'duration': duration,
+            'user_recipe': True if current_user == user_id  else False 
         })
 
     return jsonify(result), 200
@@ -432,6 +508,7 @@ def get_all_recipes():
 @jwt_required()
 def get_all_user_recipes():
     current_user = get_jwt_identity()
+    print(current_user)
     recipes_ref = db.collection('recipes').where('user_id', '==', current_user)
     recipes = recipes_ref.stream()
 
@@ -439,6 +516,8 @@ def get_all_user_recipes():
     for recipe in recipes:
         recipe_data = recipe.to_dict()
         ingredients = recipe_data.get('ingredients', [])
+        details = recipe_data.get('details', None)
+        duration = recipe_data.get('duration', None)
         detailed_ingredients = []
         steps = recipe_data.get('steps', [])
         total_calories = 0
@@ -465,48 +544,55 @@ def get_all_user_recipes():
                         item_calories = matching_item.get('calories', 0)
                     else:
                         item_calories = 0
-                    detailed_ingredients.append({'item': ingredient.get('item'), 'calories': item_calories})
+                    detailed_ingredients.append({'item': ingredient.get('item'), 'quantity': ingredient.get('quantity'), 'calories': item_calories})
                     total_calories += item_calories
 
         result.append({
             'recipe_id': recipe.id,
             'recipe_name': recipe_data.get('recipe_name'),
+            'details': details,
             'ingredients': detailed_ingredients,
             'steps': steps,
-            'total_calories': total_calories
+            'total_calories': total_calories,
+            'duration': duration,
+            'user_recipe': True,
         })
 
     return jsonify(result), 200
 
-@app.route('/delete_recipe', methods=['DELETE'])
+@app.route('/delete_recipe/<recipe_id>', methods=['DELETE'])
 @jwt_required()
-def delete_recipe():
+def delete_recipe(recipe_id):
     current_user = get_jwt_identity()
-    recipe_name = request.args.get('recipe_name')
 
-    if not current_user or not recipe_name:
-        return jsonify({'error': 'User ID and recipe name are required'}), 400
+    if not current_user or not recipe_id:
+        return jsonify({'error': 'User ID and recipe ID are required'}), 400
 
-    recipes_ref = db.collection('recipes').where('user_id', '==', current_user).where('recipe_name', '==', recipe_name)
-    recipes = recipes_ref.stream()
+    recipe_ref = db.collection('recipes').document(recipe_id)
+    recipe = recipe_ref.get()
 
-    for recipe in recipes:
-        recipe_ref = db.collection('recipes').document(recipe.id)
-        recipe_ref.delete()
-        return jsonify({'msg': 'Recipe deleted'}), 200
+    if not recipe.exists:
+        return jsonify({'error': 'Recipe not found'}), 404
 
-    return jsonify({'error': 'Recipe not found'}), 404
+    if recipe.to_dict().get('user_id') != current_user:
+        return jsonify({'error': 'Unauthorized access to the recipe'}), 403
+
+    recipe_ref.delete()
+    return jsonify({'msg': 'Recipe deleted'}), 200
 
 @app.route('/update_recipe', methods=['PUT'])
 @jwt_required()
 def update_recipe():
     current_user = get_jwt_identity()
     data = request.json
+    recipe_id = data.get('recipe_id')
     recipe_name = data.get('recipe_name')
+    details = data.get('details')
+    duration = data.get('duration')
     ingredients = data.get('ingredients')
     steps = data.get('steps')
 
-    if not current_user or not recipe_name or not ingredients or not steps:
+    if not current_user or not recipe_id or not ingredients or not steps:
         return jsonify({'error': 'Missing meal information'}), 400
 
     if not isinstance(ingredients, list) or not all(isinstance(i, dict) for i in ingredients):
@@ -515,18 +601,97 @@ def update_recipe():
     if not isinstance(steps, list) or not all(isinstance(i, dict) for i in steps):
         return jsonify({'error': 'Steps must be a list of dictionaries'}), 400
 
-    recipes_ref = db.collection('recipes').where('user_id', '==', current_user).where('recipe_name', '==', recipe_name)
-    recipes = recipes_ref.stream()
+    recipe_ref = db.collection('recipes').document(recipe_id)
+    recipe = recipe_ref.get()
 
-    for recipe in recipes:
-        recipe_ref = db.collection('recipes').document(recipe.id)
+    if recipe.exists:
+        if recipe.to_dict().get('user_id') != current_user:
+            return jsonify({'error': 'Unauthorized access to the recipe'}), 403
+
         recipe_ref.update({
+            'recipe_name': recipe_name,
+            'details': details,
+            'duration': duration,
+            'steps': steps,
             'ingredients': ingredients,
-            'steps': steps
         })
         return jsonify({'msg': 'Recipe updated'}), 200
 
     return jsonify({'error': 'Recipe not found'}), 404
+
+@app.route('/create_recipe', methods=['POST'])
+@jwt_required()
+def create_recipe():
+    current_user = get_jwt_identity()
+
+    if not current_user:
+        return jsonify({'error': 'User ID is required'}), 400
+    
+    # if 'recipe_image' not in request.files:
+    #     return jsonify({'error': 'No image provided'}), 400
+
+    # file = request.files['recipe_image']
+
+    # if file.filename == '':
+    #     return jsonify({'error': 'No selected file'}), 400
+    
+    # Get JSON data from request
+    data = request.get_json()
+
+    # Extract recipe data
+    recipe_name = data.get('recipe_name')
+    # user_id = data.get('user_id')
+    details = data.get('details')
+    duration = data.get('duration')
+    steps = data.get('steps')
+    ingredients = data.get('ingredients')
+
+    # Validate required fields
+    if not all([recipe_name, details, duration, steps, ingredients]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # # Upload the image to Firebase Storage
+    # blob = bucket.blob(f'recipe_images/{file.filename}')
+    # blob.upload_from_file(file)
+
+    # # Make the file publicly accessible
+    # blob.make_public()
+
+    date_created = date.today().strftime('%Y-%m-%d')
+
+    # Create a new recipe document
+    recipe_ref = db.collection('recipes').document()
+    recipe_ref.set({
+        'recipe_name': recipe_name,
+        'user_id': current_user,
+        'date': date_created,
+        'details': details,
+        'duration': duration,
+        'steps': steps,
+        'ingredients': ingredients,
+        # 'image_url': blob.public_url,
+    })
+
+    return jsonify({'success': True, 'message': 'Recipe created successfully', 'id': recipe_ref.id}), 201
+
+@app.route('/upload-image', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    # Upload the image to Firebase Storage
+    blob = bucket.blob(f'recipe_images/{file.filename}')
+    blob.upload_from_file(file)
+
+    # Make the file publicly accessible
+    blob.make_public()
+
+    # Return the public URL of the uploaded image
+    return jsonify({'url': blob.public_url})
 
 ##others
 def get_steps_for_date(user_doc_id, date):

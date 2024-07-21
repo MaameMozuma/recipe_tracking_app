@@ -43,6 +43,7 @@ dependencies:
   foundation: ^0.0.5
   fl_chart: ^0.68.0
   shared_preferences: ^2.2.3
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:team_proj_leanne/model/recipe_model.dart';
 
 class RecipeCard extends StatelessWidget {
-  const RecipeCard({super.key});
+  final Recipe recipe;
+
+  const RecipeCard({super.key, required this.recipe});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,6 @@ class RecipeCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Row(
-                // mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Icon(
@@ -35,40 +37,51 @@ class RecipeCard extends StatelessWidget {
               const SizedBox(
                 height: 5,
               ),
-              Center(child: Image.asset('assets/images/food-template.png')),
-              const SizedBox(
-                height: 5,
-              ),
-              const Text(
-                'Avocado Toast',
-                // textAlign: TextAlign.left,
-                style: TextStyle(
-                  // color: Color.fromARGB(255, 120, 82, 174),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
+              Center(
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Image.network(
+                                      'https://storage.googleapis.com/mobiledev-f3a76.appspot.com/recipe_images/food-template2.png',
+                                      fit: BoxFit
+                    .cover, // Adjust this to control how the image should be resized or fit.
+                                    ),
                 ),
               ),
               const SizedBox(
                 height: 5,
               ),
-              const Row(
+              Text(
+                recipe.recipeName,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.circle,
                     size: 12,
                     color: Color.fromARGB(255, 120, 82, 174),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 5,
                   ),
                   Text(
-                    '245kcal',
-                    // textAlign: TextAlign.left,
-                    style: TextStyle(
+                    "${recipe.totalCalories.toString()} kcal",
+                    style: const TextStyle(
                       color: Colors.grey,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ],
               )
