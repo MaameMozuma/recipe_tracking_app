@@ -1,6 +1,6 @@
 from flask import Flask
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, messaging
 from flask_jwt_extended import JWTManager
 
 ## Initialize Credentials & DB

@@ -14,12 +14,18 @@ users = db.collection("user")
 def login():
     """Logs the user in, requires a username and password"""
     global users
+    data = request.get_json()
 
     if h.valid_login_fields(request) and h.verified_credentials(users, request):
         username = request.json.get("username", None)
         print(username)
         expires = timedelta(days=30)
         access_token = create_access_token(username, expires_delta=expires)
+
+        # Update notification token
+        user_ref = users.document(username)
+        user_ref.update({'fcmtoken': data.get('fcmtoken')})
+        print(f"Updated fcmtoken for user {username}")
 
         return jsonify(access_token = access_token), 200
 
