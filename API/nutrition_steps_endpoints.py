@@ -5,11 +5,14 @@ from dotenv import load_dotenv
 from flask_jwt_extended import get_jwt_identity, jwt_required
 import helpers as h
 import requests
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+import random
 
 load_dotenv()
 
 users = db.collection("user")
+steps_collection = db.collection('steps')
+calories_collection = db.collection('calories')
 
 
 
@@ -73,7 +76,8 @@ def create_meal():
         'image_url': image_url,
         'time_hours': time_hours,
         'time_minutes': time_minutes,
-        'date': current_date
+        'date': current_date,
+        'total_calories': 0
     }
 
     meal_ref.set(meal_data)
@@ -133,11 +137,15 @@ def get_meal():
             'meal_name': meal_name,
             'image_url': meal_data.get('image_url'),
             'ingredients': detailed_ingredients,
-            'total_calories': total_calories
+            'total_calories': total_calories,
+            'time_hours': meal_data.get('time_hours'),
+            'time_minutes': meal_data.get('time_minutes'),
+            'date': meal_data.get('date')
         }
         break
 
     return jsonify(result), 200
+
 
 @app.route('/get_all_meals', methods=['GET'])
 def get_all_meals():
@@ -149,7 +157,7 @@ def get_all_meals():
         meal_data = meal.to_dict()
         ingredients = meal_data.get('ingredients', [])
         detailed_ingredients = []
-        total_calories = 0
+        total_calories = 0.0
 
         ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
 
@@ -181,7 +189,10 @@ def get_all_meals():
             'meal_name': meal_data.get('meal_name'),
             'image_url': meal_data.get('image_url'),
             'ingredients': detailed_ingredients,
-            'total_calories': total_calories
+            'total_calories': total_calories,
+            'time_hours': meal_data.get('time_hours'),
+            'time_minutes': meal_data.get('time_minutes'),
+            'date': meal_data.get('date')  
         })
 
     return jsonify(result), 200
@@ -230,7 +241,10 @@ def get_all_user_meals():
             'meal_name': meal_data.get('meal_name'),
             'image_url': meal_data.get('image_url'),
             'ingredients': detailed_ingredients,
-            'total_calories': total_calories
+            'total_calories': total_calories,
+            'time_hours': meal_data.get('time_hours'),
+            'time_minutes': meal_data.get('time_minutes'),
+            'date': meal_data.get('date')  
         })
 
     return jsonify(result), 200
@@ -407,6 +421,7 @@ def get_recipe_by_id(recipe_id):
     details = recipe_data.get('details', None)
     steps = recipe_data.get('steps', [])
     user_id = recipe_data.get('user_id', None)
+    image_url = recipe_data.get('image_url', None)
     total_calories = 0
 
     ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
@@ -442,6 +457,7 @@ def get_recipe_by_id(recipe_id):
         'duration': duration,
         'steps': steps,
         'total_calories': total_calories,
+        'image_url': image_url,
         'user_recipe': True if user_id == current_user else False,
     }
 
@@ -464,6 +480,7 @@ def get_all_recipes():
         detailed_ingredients = []
         steps = recipe_data.get('steps', [])
         user_id = recipe_data.get('user_id', None)
+        image_url = recipe_data.get("image_url", None)
         total_calories = 0
 
         ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
@@ -499,6 +516,7 @@ def get_all_recipes():
             'steps': steps,
             'total_calories': total_calories,
             'duration': duration,
+            "image_url": image_url,
             'user_recipe': True if current_user == user_id  else False 
         })
 
@@ -520,6 +538,7 @@ def get_all_user_recipes():
         duration = recipe_data.get('duration', None)
         detailed_ingredients = []
         steps = recipe_data.get('steps', [])
+        image_url = recipe_data.get("image_url", None)
         total_calories = 0
 
         ingredient_names = [ingredient.get('item') for ingredient in ingredients if ingredient.get('item')]
@@ -555,6 +574,7 @@ def get_all_user_recipes():
             'steps': steps,
             'total_calories': total_calories,
             'duration': duration,
+            "image_url": image_url,
             'user_recipe': True,
         })
 
@@ -645,6 +665,7 @@ def create_recipe():
     duration = data.get('duration')
     steps = data.get('steps')
     ingredients = data.get('ingredients')
+    image_url = data.get('image_url')
 
     # Validate required fields
     if not all([recipe_name, details, duration, steps, ingredients]):
@@ -669,7 +690,7 @@ def create_recipe():
         'duration': duration,
         'steps': steps,
         'ingredients': ingredients,
-        # 'image_url': blob.public_url,
+        'image_url': image_url,
     })
 
     return jsonify({'success': True, 'message': 'Recipe created successfully', 'id': recipe_ref.id}), 201
@@ -742,6 +763,205 @@ def get_calories():
         return jsonify({'calories': calories}), 200
     else:
         return jsonify({'error': 'No steps data found for the specified date'}), 404
+
+
+"""Steps and calories"""
+def get_dates_for_week(date):
+    start_of_week = date - timedelta(days=date.weekday())
+    return [start_of_week + timedelta(days=i) for i in range(7)]
+
+def get_weeks_for_month(date):
+    first_day_of_month = date.replace(day=1)
+    days_in_month = (first_day_of_month.replace(month=date.month % 12 + 1, day=1) - timedelta(days=1)).day
+    return [first_day_of_month + timedelta(days=7 * i) for i in range((days_in_month // 7) + 1)]
+
+@app.route('/store_steps', methods=['POST'])
+@jwt_required()
+def store_steps():
+    data = request.json
+    user_id = get_jwt_identity()
+    steps = data.get('steps')
+    date_str = data.get('date')
+    date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    
+    steps_doc = steps_collection.document(user_id).collection('dates').document(date_str)
+    steps_doc.set({'steps': steps})
+    
+    return jsonify({'success': True}), 200
+
+@app.route('/store_calories', methods=['POST'])
+@jwt_required()
+def store_calories():
+    data = request.json
+    user_id = get_jwt_identity()
+    calories = data.get('calories')
+    date_str = data.get('date')
+    date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    
+    calories_doc = calories_collection.document(user_id).collection('dates').document(date_str)
+    calories_doc.set({'calories': calories})
+    
+    return jsonify({'success': True}), 200
+
+
+@app.route('/get_steps_summary', methods=['GET'])
+@jwt_required()
+def get_steps_summary():
+    user_id = get_jwt_identity()
+
+    # Use the current date
+    today = datetime.now().date()
+    current_year = today.year
+    current_month = today.month
+
+    # Determine the start and end dates for the current week
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    
+    # Determine the start and end dates for the current month
+    start_of_month = datetime(current_year, current_month, 1).date()
+    end_of_month = (start_of_month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+
+    # Fetch weekly steps
+    weekly_steps_data = []
+    total_weekly_steps = 0
+    current_date = start_of_week
+    while current_date <= end_of_week:
+        day_of_week = current_date.strftime('%A')  # Get the name of the day
+        steps_doc = steps_collection.document(user_id).collection('dates').document(current_date.strftime('%Y-%m-%d')).get()
+        if steps_doc.exists:
+            steps = steps_doc.to_dict().get('steps', 0)
+        else:
+            steps = 0
+        weekly_steps_data.append({
+            'day_of_week': day_of_week,
+            'date': current_date.strftime('%Y-%m-%d'),
+            'count': steps
+        })
+        total_weekly_steps += steps
+        current_date += timedelta(days=1)
+
+    # Fetch monthly steps
+    monthly_steps_data = []
+    total_monthly_steps = 0
+    current_date = start_of_month
+    while current_date <= end_of_month:
+        start_of_week = current_date - timedelta(days=current_date.weekday())
+        end_of_week = start_of_week + timedelta(days=6)
+
+        # Ensure end_of_week is not beyond end_of_month
+        if end_of_week > end_of_month:
+            end_of_week = end_of_month
+
+        total_steps = 0
+        week_current_date = start_of_week
+        while week_current_date <= end_of_week:
+            steps_doc = steps_collection.document(user_id).collection('dates').document(week_current_date.strftime('%Y-%m-%d')).get()
+            if steps_doc.exists:
+                total_steps += steps_doc.to_dict().get('steps', 0)
+            week_current_date += timedelta(days=1)
+
+        monthly_steps_data.append({
+            'start_date': start_of_week.strftime('%Y-%m-%d'),
+            'end_date': end_of_week.strftime('%Y-%m-%d'),
+            'count': total_steps
+        })
+        total_monthly_steps += total_steps
+        current_date = end_of_week + timedelta(days=1)
+
+    # Prepare response
+    response = {
+        'weekly': {
+            'data': weekly_steps_data,
+            'total': total_weekly_steps
+        },
+        'monthly': {
+            'data': monthly_steps_data,
+            'total': total_monthly_steps
+        }
+    }
+
+    return jsonify(response), 200
+
+
+@app.route('/get_calories_summary', methods=['GET'])
+@jwt_required()
+def get_calories_summary():
+    user_id = get_jwt_identity()
+
+    # Use the current date
+    today = datetime.now().date()
+    current_year = today.year
+    current_month = today.month
+
+    # Determine the start and end dates for the current week
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    
+    # Determine the start and end dates for the current month
+    start_of_month = datetime(current_year, current_month, 1).date()
+    end_of_month = (start_of_month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+
+    # Fetch weekly calories
+    weekly_calories_data = []
+    total_weekly_calories = 0
+    current_date = start_of_week
+    while current_date <= end_of_week:
+        day_of_week = current_date.strftime('%A')  # Get the name of the day
+        calories_doc = calories_collection.document(user_id).collection('dates').document(current_date.strftime('%Y-%m-%d')).get()
+        if calories_doc.exists:
+            calories = calories_doc.to_dict().get('calories', 0)
+        else:
+            calories = 0
+        weekly_calories_data.append({
+            'day_of_week': day_of_week,
+            'date': current_date.strftime('%Y-%m-%d'),
+            'count': calories
+        })
+        total_weekly_calories += calories
+        current_date += timedelta(days=1)
+
+    # Fetch monthly calories
+    monthly_calories_data = []
+    total_monthly_calories = 0
+    current_date = start_of_month
+    while current_date <= end_of_month:
+        start_of_week = current_date - timedelta(days=current_date.weekday())
+        end_of_week = start_of_week + timedelta(days=6)
+
+        # Ensure end_of_week is not beyond end_of_month
+        if end_of_week > end_of_month:
+            end_of_week = end_of_month
+
+        total_calories = 0
+        week_current_date = start_of_week
+        while week_current_date <= end_of_week:
+            calories_doc = calories_collection.document(user_id).collection('dates').document(week_current_date.strftime('%Y-%m-%d')).get()
+            if calories_doc.exists:
+                total_calories += calories_doc.to_dict().get('calories', 0)
+            week_current_date += timedelta(days=1)
+
+        monthly_calories_data.append({
+            'start_date': start_of_week.strftime('%Y-%m-%d'),
+            'end_date': end_of_week.strftime('%Y-%m-%d'),
+            'count': total_calories
+        })
+        total_monthly_calories += total_calories
+        current_date = end_of_week + timedelta(days=1)
+
+    # Prepare response
+    response = {
+        'weekly': {
+            'data': weekly_calories_data,
+            'total': total_weekly_calories
+        },
+        'monthly': {
+            'data': monthly_calories_data,
+            'total': total_monthly_calories
+        }
+    }
+
+    return jsonify(response), 200
 
 
 

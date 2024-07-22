@@ -1,65 +1,83 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, non_constant_identifier_names
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 class Meal {
-  final String name;
-  final int totalCalories;
-  final String mealImage;
-  final DateTime date;
-  final List<Map<String, dynamic>> mealIngredients;
-
+  final String meal_name;
+  final int time_hours;
+  final int time_minutes;
+  final double total_calories;
+  final String image_url;
+  final String date;
+  final String? totalCalories;
+  final List<Map<String, dynamic>> ingredients;
   Meal({
-    required this.name,
-    required this.totalCalories,
-    required this.mealImage,
+    required this.meal_name,
+    required this.time_hours,
+    required this.time_minutes,
+    required this.total_calories,
+    required this.image_url,
     required this.date,
-    required this.mealIngredients,
+    this.totalCalories,
+    required this.ingredients,
   });
 
+
   Meal copyWith({
-    String? name,
-    int? totalCalories,
-    String? mealImage,
+    String? meal_name,
+    int? time_hours,
+    int? time_minutes,
+    double? total_calories,
+    String? image_url,
     String? date,
-    List<Map<String, dynamic>>? mealIngredients,
+    String? totalCalories,
+    List<Map<String, dynamic>>? ingredients,
   }) {
     return Meal(
-      name: name ?? this.name,
+      meal_name: meal_name ?? this.meal_name,
+      time_hours: time_hours ?? this.time_hours,
+      time_minutes: time_minutes ?? this.time_minutes,
+      total_calories: total_calories ?? this.total_calories,
+      image_url: image_url ?? this.image_url,
+      date: date ?? this.date,
       totalCalories: totalCalories ?? this.totalCalories,
-      mealImage: mealImage ?? this.mealImage,
-      date: date as DateTime? ?? this.date,
-      mealIngredients: mealIngredients ?? this.mealIngredients,
+      ingredients: ingredients ?? this.ingredients,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'name': name,
-      'totalCalories': totalCalories,
-      'mealImage': mealImage,
+      'meal_name': meal_name,
+      'time_hours': time_hours,
+      'time_minutes': time_minutes,
+      'total_calories': total_calories,
+      'image_url': image_url,
       'date': date,
-      'mealIngredients': mealIngredients,
+      'totalCalories': totalCalories,
+      'ingredients': ingredients,
     };
   }
 
   factory Meal.fromMap(Map<String, dynamic> map) {
     return Meal(
-      name: map['name'] as String,
-      totalCalories: map['totalCalories'] as int,
-      mealImage: map['mealImage'] as String,
-      date: map['date'] as DateTime,
-      mealIngredients: List<Map<String, dynamic>>.from((map['mealIngredients'] as List<Map<String, dynamic>>).map<Map<String, dynamic>>((x) => x,),),
+      meal_name: map['meal_name'] as String,
+      time_hours: map['time_hours'] as int,
+      time_minutes: map['time_minutes'] as int,
+      total_calories: map['total_calories'] as double,
+      image_url: map['image_url'] as String,
+      date: map['date'] as String,
+      totalCalories: map['totalCalories'] != null ? map['totalCalories'] as String : null,
+      ingredients: List<Map<String, dynamic>>.from((map['ingredients'] as List).map<Map<String, dynamic>>((x) => x,),),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory Meal.fromJson(String source) => Meal.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Meal.fromJson(Map<String, dynamic> json) => Meal.fromMap(json);
 
   @override
   String toString() {
-    return 'Meal(name: $name, totalCalories: $totalCalories, mealImage: $mealImage, date: $date, mealIngredients: $mealIngredients)';
+    return 'Meal(meal_name: $meal_name, time_hours: $time_hours, time_minutes: $time_minutes, total_calories: $total_calories, image_url: $image_url, date: $date, totalCalories: $totalCalories, ingredients: $ingredients)';
   }
 
   @override
@@ -67,19 +85,25 @@ class Meal {
     if (identical(this, other)) return true;
   
     return 
-      other.name == name &&
-      other.totalCalories == totalCalories &&
-      other.mealImage == mealImage &&
+      other.meal_name == meal_name &&
+      other.time_hours == time_hours &&
+      other.time_minutes == time_minutes &&
+      other.total_calories == total_calories &&
+      other.image_url == image_url &&
       other.date == date &&
-      listEquals(other.mealIngredients, mealIngredients);
+      other.totalCalories == totalCalories &&
+      listEquals(other.ingredients, ingredients);
   }
 
   @override
   int get hashCode {
-    return name.hashCode ^
-      totalCalories.hashCode ^
-      mealImage.hashCode ^
+    return meal_name.hashCode ^
+      time_hours.hashCode ^
+      time_minutes.hashCode ^
+      total_calories.hashCode ^
+      image_url.hashCode ^
       date.hashCode ^
-      mealIngredients.hashCode;
+      totalCalories.hashCode ^
+      ingredients.hashCode;
   }
 }

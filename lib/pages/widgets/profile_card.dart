@@ -29,7 +29,10 @@ class ProfileCard extends StatelessWidget {
                   SizedBox(
                     width: 5,
                   ),
-                  Text('Total Calories', style: TextStyle(fontSize: 15),)
+                  Text(
+                    'Total Calories',
+                    style: TextStyle(fontSize: 15),
+                  )
                 ],
               ),
               const SizedBox(
@@ -41,13 +44,17 @@ class ProfileCard extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: '500',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.black),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Colors.black),
                     ),
                     TextSpan(
                       text: ' steps',
                       style: TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 20, color: Colors.black),
+                          fontWeight: FontWeight.normal,
+                          fontSize: 20,
+                          color: Colors.black),
                     ),
                   ],
                 ),

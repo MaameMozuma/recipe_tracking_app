@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:team_proj_leanne/controllers/meal_controller.dart';
 import 'package:team_proj_leanne/pages/widgets/mealSelection.dart';
 import 'package:team_proj_leanne/pages/widgets/search.dart';
 import 'package:team_proj_leanne/model/meal.dart';
@@ -12,102 +13,16 @@ class DisplayAllMeals extends StatefulWidget {
 }
 
 class _DisplayAllMealsState extends State<DisplayAllMeals> {
-  late List<Meal> _filteredMeals;
-  final List<Meal> sampleMeals = [
-    Meal(
-      name: 'Avocado Salad',
-      totalCalories: 280,
-      mealImage:
-          'https://www.eatwell101.com/wp-content/uploads/2019/04/avocado-salad-recipe.jpg',
-      date:DateTime.timestamp(),
-      mealIngredients: [
-        {"name": "Oats", "quantity": "100g", "calories": 389},
-        {"name": "Milk", "quantity": "200ml", "calories": 130}
-      ],
-    ),
-    Meal(
-      name: 'Chicken Salad',
-      totalCalories: 300,
-      mealImage:
-          'https://www.eatwell101.com/wp-content/uploads/2019/04/avocado-salad-recipe.jpg',
-      date: DateTime.timestamp(),
-      mealIngredients: [
-        {"name": "Oats", "quantity": "100g", "calories": 389},
-        {"name": "Milk", "quantity": "200ml", "calories": 130}
-      ],
-    ),
-    Meal(
-      name: 'Fruit Salad',
-      totalCalories: 150,
-      mealImage:
-          'https://www.eatwell101.com/wp-content/uploads/2019/04/avocado-salad-recipe.jpg',
-      date: DateTime.timestamp(),
-      mealIngredients: [
-        {"name": "Oats", "quantity": "100g", "calories": 389},
-        {"name": "Milk", "quantity": "200ml", "calories": 130}
-      ],
-    ),
-     Meal(
-      name: 'Quinoa Salad',
-      totalCalories: 350,
-      mealImage:
-          'https://www.eatwell101.com/wp-content/uploads/2019/04/avocado-salad-recipe.jpg',
-      date: DateTime(2024, 6, 27, 13, 0),
-      mealIngredients: [
-        {"name": "Quinoa", "quantity": "200g", "calories": 120},
-        {"name": "Tomatoes", "quantity": "100g", "calories": 18}
-      ],
-    ),
-    Meal(
-      name: 'Steak and Veggies',
-      totalCalories: 450,
-      mealImage:
-          'https://www.eatwell101.com/wp-content/uploads/2019/04/avocado-salad-recipe.jpg',
-      date: DateTime(2024, 6, 27, 20, 0),
-      mealIngredients: [
-        {"name": "Steak", "quantity": "250g", "calories": 271},
-        {"name": "Broccoli", "quantity": "100g", "calories": 34}
-      ],
-    ),
-    Meal(
-      name: 'Scrambled Eggs',
-      totalCalories: 220,
-      mealImage:
-          'https://www.eatwell101.com/wp-content/uploads/2019/04/avocado-salad-recipe.jpg',
-      date: DateTime(2024, 6, 26, 7, 30),
-      mealIngredients: [
-        {"name": "Eggs", "quantity": "3", "calories": 210},
-        {"name": "Butter", "quantity": "10g", "calories": 72}
-      ],
-    ),
-    Meal(
-      name: 'Tuna Sandwich',
-      totalCalories: 310,
-      mealImage:
-          'https://www.eatwell101.com/wp-content/uploads/2019/04/avocado-salad-recipe.jpg',
-      date: DateTime(2024, 6, 26, 12, 15),
-      mealIngredients: [
-        {"name": "Tuna", "quantity": "100g", "calories": 132},
-        {"name": "Whole Grain Bread", "quantity": "2 slices", "calories": 138}
-      ],
-    ),
-    Meal(
-      name: 'Veggie Stir-Fry',
-      totalCalories: 280,
-      mealImage:
-          'https://www.eatwell101.com/wp-content/uploads/2019/04/avocado-salad-recipe.jpg',
-      date: DateTime(2024, 6, 26, 18, 30),
-      mealIngredients: [
-        {"name": "Bell Peppers", "quantity": "150g", "calories": 45},
-        {"name": "Carrots", "quantity": "100g", "calories": 41}
-      ],
-    ),
-  ];
+  List<Meal> _filteredMeals = [];
+  final List<Meal> sampleMeals = [];
+  final MealController _mealController = MealController();
+  bool _isLoading = true;
+  String? _errorMessage;
 
   Future<List<Meal>> filterMeals(String query) async {
-    await Future.delayed(const Duration(milliseconds: 500)); // Simulate a delay
+    await Future.delayed(const Duration(milliseconds: 200)); // Simulate a delay
     return sampleMeals.where((meal) {
-      final mealNameLower = meal.name.toLowerCase();
+      final mealNameLower = meal.meal_name.toLowerCase();
       final queryLower = query.toLowerCase();
       return mealNameLower.contains(queryLower);
     }).toList();
@@ -116,20 +31,51 @@ class _DisplayAllMealsState extends State<DisplayAllMeals> {
   @override
   void initState() {
     super.initState();
-    _filteredMeals = sampleMeals;
+    _fetchMeals();
+  }
+
+  Future<void> _fetchMeals() async {
+    try {
+      List<Meal> meals = await _mealController.getUserMeals();
+      setState(() {
+        sampleMeals.addAll(meals);
+        _filteredMeals = sampleMeals; // Initialize filtered meals
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load meals: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _deleteMeal(Meal meal) async {
+    try {
+      await _mealController.deleteMeal(meal.meal_name);
+      setState(() {
+        sampleMeals.remove(meal);
+        _filteredMeals = sampleMeals;
+      });
+    } catch (e) {
+      // Handle the error, for example by showing a snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete meal: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    Map<String, List<Meal>> groupedMeals = groupMealsByDate(sampleMeals);
+    Map<String, List<Meal>> groupedMeals = groupMealsByDate(_filteredMeals);
     List<String> pastWeekDates = getPastWeekDates();
     return Scaffold(
-            appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: const Color.fromRGBO(230, 230, 250, 1.0),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           },
         ),
       ),
@@ -142,67 +88,83 @@ class _DisplayAllMealsState extends State<DisplayAllMeals> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Meals',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30,
-                      ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Meals',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 30,
                     ),
                   ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  CustomSearchBar(
-                    placeholder: 'Search for meals',
-                    filterMeals: filterMeals,
-                    onFilteredData: (filteredMeals) {
-                      setState(() {
-                        _filteredMeals = filteredMeals;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20,),
-                  Expanded(
-                    child: ListView(
-                    children: pastWeekDates.map((date){
-                      String title = getDayTitle(date);
-                      return groupedMeals.containsKey(date)?
-                      Mealselection(title: title, meals: groupedMeals[date]!):
-                      Container();
-                    }).toList(),
-                  ),
-                  ),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                CustomSearchBar(
+                  placeholder: 'Search for meals',
+                  filterMeals: filterMeals,
+                  onFilteredData: (filteredMeals) {
+                    setState(() {
+                      _filteredMeals = filteredMeals;
+                    });
+                  },
+                  originalMeals: List.from(sampleMeals),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _errorMessage != null
+                        ? Center(child: Text(_errorMessage!))
+                        :_filteredMeals.isEmpty
+                            ? const Center(child: Text('No meals found'))
+                        : Expanded(
+                            child: ListView(
+                              children: pastWeekDates.map((date) {
+                                String title = getDayTitle(date);
+                                return groupedMeals.containsKey(date)
+                                    ? Mealselection(
+                                        title: title,
+                                        meals: groupedMeals[date]!,
+                                        onDelete: _deleteMeal,
+                                      )
+                                    : Container();
+                              }).toList(),
+                            ),
+                          ),
               ],
-              ),),),),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-List<String> getPastWeekDates() {
-  List<String> dates = [];
-  DateTime now = DateTime.now();
+  List<String> getPastWeekDates() {
+    List<String> dates = [];
+    DateTime now = DateTime.now();
 
-  for (int i = 0; i < 7; i++) {
-    DateTime date = now.subtract(Duration(days: i));
-    dates.add(DateFormat('yyyy-MM-dd').format(date));
-  }
-
-  return dates;
-}
-
-Map<String, List<Meal>> groupMealsByDate(List<Meal> meals) {
-  Map<String, List<Meal>> groupedMeals = {};
-
-  for (Meal meal in meals) {
-    String date = DateFormat('yyyy-MM-dd').format(meal.date);
-    if (!groupedMeals.containsKey(date)) {
-      groupedMeals[date] = [];
+    for (int i = 0; i < 7; i++) {
+      DateTime date = now.subtract(Duration(days: i));
+      dates.add(DateFormat('yyyy-MM-dd').format(date));
     }
-    groupedMeals[date]!.add(meal);
+
+    return dates;
   }
-  return groupedMeals;
-}
+
+  Map<String, List<Meal>> groupMealsByDate(List<Meal> meals) {
+    Map<String, List<Meal>> groupedMeals = {};
+
+    for (Meal meal in meals) {
+      String date = meal.date;
+      if (!groupedMeals.containsKey(date)) {
+        groupedMeals[date] = [];
+      }
+      groupedMeals[date]!.add(meal);
+    }
+    return groupedMeals;
+  }
 
   String getDayTitle(String date) {
     DateTime now = DateTime.now();
@@ -210,11 +172,12 @@ Map<String, List<Meal>> groupMealsByDate(List<Meal> meals) {
 
     if (date == DateFormat('yyyy-MM-dd').format(now)) {
       return 'Today';
-    } else if (date == DateFormat('yyyy-MM-dd').format(now.subtract(Duration(days: 1)))) {
+    } else if (date ==
+        DateFormat('yyyy-MM-dd').format(now.subtract(Duration(days: 1)))) {
       return 'Yesterday';
     } else {
-      return DateFormat('EEEE').format(dateTime); // Return day name (e.g., Monday)
+      return DateFormat('EEEE')
+          .format(dateTime); // Return day name (e.g., Monday)
     }
   }
-
 }

@@ -14,17 +14,17 @@ class UserStatistics extends StatefulWidget {
 class _UserStatisticsState extends State<UserStatistics> {
   final UserController _userController = UserController();
   DateTime parseDateString(String dateString) {
-  final parts = dateString.split('/');
-  if (parts.length == 3) {
-    final year = int.parse(parts[2]) + 2000; // Assuming all dates are in the 2000s
-    final month = int.parse(parts[1]);
-    final day = int.parse(parts[0]);
-    return DateTime(year, month, day);
-  } else {
-    throw FormatException('Invalid date format');
+    final parts = dateString.split('/');
+    if (parts.length == 3) {
+      final year =
+          int.parse(parts[2]) + 2000; // Assuming all dates are in the 2000s
+      final month = int.parse(parts[1]);
+      final day = int.parse(parts[0]);
+      return DateTime(year, month, day);
+    } else {
+      throw FormatException('Invalid date format');
+    }
   }
-}
-
 
   int calculateAge(DateTime dob) {
     DateTime today = DateTime.now();
@@ -95,10 +95,35 @@ class _UserStatisticsState extends State<UserStatistics> {
                               ),
                             ],
                           ),
-                          const Center(
-                            child: Icon(
-                              Icons.person,
-                              size: 110,
+                          Center(
+                            child: ClipOval(
+                              child: user.profile_pic_url.isNotEmpty
+                                  ? Image.network(
+                                      user.profile_pic_url,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        // Handle image loading error
+                                        return Container(
+                                          width: 55,
+                                          height: 55,
+                                          color: Colors.grey[
+                                              300], // Background color for error state
+                                          child: Icon(
+                                            Icons.person, // Default meal icon
+                                            size: 30,
+                                            color: Colors.grey[600],
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : const Icon(
+                                      Icons.person,
+                                      size: 100,
+                                      color: Colors.grey,
+                                    ),
                             ),
                           ),
                           Text(
@@ -154,7 +179,7 @@ class _UserStatisticsState extends State<UserStatistics> {
                                 children: [
                                   Text(
                                     '$age y.o',
-                                    style:const TextStyle(
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.w900,
                                         fontSize: 20),
                                   ),

@@ -5,10 +5,13 @@ import 'package:team_proj_leanne/pages/widgets/meal_card.dart';
 class Mealselection extends StatelessWidget {
   final String title;
   final List<Meal> meals;
+  final void Function(Meal) onDelete;
+  
   const Mealselection({
     super.key,
     required this.title,
-    required this.meals,});
+    required this.meals,
+    required this.onDelete,});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +27,7 @@ class Mealselection extends StatelessWidget {
           ),
         ),
         ),
-        ...meals.map((meal) => MealCard(meal: meal)),
+        ...meals.map((meal) => MealCard(meal: meal, onDelete: () => onDelete(meal))),
       ],);
   }
 }

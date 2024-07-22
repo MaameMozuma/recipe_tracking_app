@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:team_proj_leanne/controllers/recipe_controller.dart';
 import 'package:team_proj_leanne/model/ingredient_model.dart';
@@ -7,6 +8,7 @@ import 'package:team_proj_leanne/model/recipe_model.dart';
 import 'package:team_proj_leanne/model/step_model.dart' as recipeStep;
 import 'package:image_picker/image_picker.dart';
 import 'package:team_proj_leanne/pages/widgets/image_picker.dart';
+import 'package:path/path.dart' as path;
 
 class CreateRecipe extends StatefulWidget {
   final Recipe? recipe;
@@ -27,15 +29,51 @@ class _CreateRecipeState extends State<CreateRecipe> {
   List<TextEditingController> _stepControllers = [];
 
   File? _recipeImage;
+  String? _recipeImageURL = "";
+
+  final _formKey = GlobalKey<FormState>();
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final PickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (PickedFile != null) {
+    if (pickedFile != null) {
       setState(() {
-        _recipeImage = File(PickedFile.path);
+        _recipeImage = File(pickedFile.path);
       });
+
+      final recipePicUrl = await _uploadImage();
+      if (recipePicUrl != null) {
+        setState(() {
+          _recipeImageURL = recipePicUrl;
+        });
+      }
+
+    }
+  }
+
+    Future<String?> _uploadImage() async {
+    if (_recipeImage == null) return "";
+
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final imagesRef = storageRef
+          .child('recipe_images/${DateTime.now().millisecondsSinceEpoch}.png');
+      final uploadTask = imagesRef.putFile(_recipeImage!);
+
+      final snapshot = await uploadTask.whenComplete(() {});
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      print("Download URL: $downloadUrl");
+
+      setState(() {
+        _recipeImageURL = downloadUrl;
+      });
+
+      print("Profile image URL updated: $_recipeImageURL");
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
     }
   }
 
@@ -122,9 +160,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
       var quantity = controllers[1].text;
 
       return Ingredient(
-        // calories: 0,
         item: item,
-        quantity: quantity, // Default to 0 if parsing fails
+        quantity: quantity,
       );
     }).toList();
 
@@ -144,25 +181,33 @@ class _CreateRecipeState extends State<CreateRecipe> {
       duration: int.parse(_durationController.text),
       ingredients: ingredients,
       steps: steps,
+      imageUrl: _recipeImageURL,
     );
 
     return recipe;
   }
 
   void _createAndEditRecipe() async {
-    try {
-      Recipe recipe = prepareRecipeObj();
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        Recipe recipe = prepareRecipeObj();
 
-      if (widget.recipe != null) {
-        await _recipeController.editRecipe(recipe);
+        if (widget.recipe != null) {
+          await _recipeController.editRecipe(recipe);
+        } else {
+          await _recipeController.createRecipe(recipe);
+        }
         Navigator.pop(context, true);
-
-      } else {
-        await _recipeController.createRecipe(recipe);
-        Navigator.pop(context, true);
+      } catch (e) {
+        final snackdemo = SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.grey,
+            elevation: 10,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(5),
+          );
+        ScaffoldMessenger.of(context).showSnackBar(snackdemo);
       }
-    } catch (e) {
-      print(e);
     }
   }
 
@@ -184,212 +229,301 @@ class _CreateRecipeState extends State<CreateRecipe> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Recipe Name',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _recipeNameController,
-                decoration: InputDecoration(
-                  hintText: 'eg. Jollof Rice',
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Recipe Name',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
                 ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Details',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _detailsController,
-                decoration: InputDecoration(
-                  hintText: 'Recipe details',
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _recipeNameController,
+                  decoration: InputDecoration(
+                    hintText: 'eg. Jollof Rice',
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a recipe name';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Duration (minutes)',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _durationController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'eg. 45',
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                const SizedBox(height: 10),
+                const Text(
+                  'Details',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Ingredients',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _detailsController,
+                  decoration: InputDecoration(
+                    hintText: 'Recipe details',
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
-                  IconButton(
-                    onPressed: _addIngredientField,
-                    icon: const Icon(Icons.add),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter recipe details';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Duration (minutes)',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _durationController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'eg. 45',
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Column(
-                children: List.generate(_ingredientControllers.length, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _ingredientControllers[index][0],
-                            decoration: InputDecoration(
-                              hintText: 'Item',
-                              filled: true,
-                              fillColor: Colors.grey[200],
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.circular(8),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter the duration';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'Please enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Ingredients',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                    ),
+                    IconButton(
+                      onPressed: _addIngredientField,
+                      icon: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Column(
+                  children:
+                      List.generate(_ingredientControllers.length, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _ingredientControllers[index][0],
+                              decoration: InputDecoration(
+                                hintText: 'Item',
+                                filled: true,
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter an ingredient item';
+                                }
+                                return null;
+                              },
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _ingredientControllers[index][1],
-                            decoration: InputDecoration(
-                              hintText: 'Qty(g)',
-                              filled: true,
-                              fillColor: Colors.grey[200],
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.circular(8),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _ingredientControllers[index][1],
+                              decoration: InputDecoration(
+                                hintText: 'Quantity',
+                                filled: true,
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a quantity';
+                                }
+                                return null;
+                              },
                             ),
                           ),
-                        ),
-                        if (_ingredientControllers.length > 1 || index > 0)
                           IconButton(
                             onPressed: () => _removeIngredientField(index),
                             icon: const Icon(Icons.remove),
                           ),
-                      ],
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Steps',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
                     ),
-                  );
-                }),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Steps',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-                  ),
-                  IconButton(
-                    onPressed: _addStepField,
-                    icon: const Icon(Icons.add),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Column(
-                children: List.generate(_stepControllers.length, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _stepControllers[index],
-                            decoration: InputDecoration(
-                              hintText: 'Step ${index + 1}',
-                              filled: true,
-                              fillColor: Colors.grey[200],
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.circular(8),
+                    IconButton(
+                      onPressed: _addStepField,
+                      icon: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Column(
+                  children: List.generate(_stepControllers.length, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _stepControllers[index],
+                              decoration: InputDecoration(
+                                hintText: 'Step ${index + 1}',
+                                filled: true,
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a step description';
+                                }
+                                return null;
+                              },
                             ),
                           ),
-                        ),
-                        if (_stepControllers.length > 1 || index > 0)
                           IconButton(
                             onPressed: () => _removeStepField(index),
                             icon: const Icon(Icons.remove),
                           ),
-                      ],
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 10),
+                widget.recipe == null
+                    ? const Text(
+                        'Recipe Image',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 20),
+                      )
+                    : const SizedBox(),
+                const SizedBox(height: 10),
+                widget.recipe == null
+                    ? GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: const Color.fromRGBO(120, 82, 174, 1.0)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      height: 70,
+                      width: double.infinity,
+                      child: _recipeImage == null
+                          ? const Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: Text('Choose Picture'),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  _recipeImage != null
+                                      ? Image.file(
+                                          _recipeImage!,
+                                          fit: BoxFit.cover,
+                                          width: 50,
+                                          height: 50,
+                                        )
+                                      : Image.network(
+                                          _recipeImageURL!,
+                                          fit: BoxFit.cover,
+                                          width: 50,
+                                          height: 50,
+                                        ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      path.basename(_recipeImage!.path),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                     ),
-                  );
-                }),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Text(
-                'Recipe Image',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-              ),
-              const SizedBox(height: 10),
-              const ImagePickerInput(),
-              const SizedBox(height: 20),
-              GestureDetector(
-                onTap: _createAndEditRecipe,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 120, 82, 174),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Center(
-                    child: Text(
-                      widget.recipe != null ? 'Edit Recipe' : 'Create Recipe',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                  )
+                    : const SizedBox(),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: _createAndEditRecipe,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 120, 82, 174),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Center(
+                      child: Text(
+                        widget.recipe != null ? 'Edit Recipe' : 'Create Recipe',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),
