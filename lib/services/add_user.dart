@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 
 String baseUrl =
@@ -5,8 +6,9 @@ String baseUrl =
 
 Future<bool> addUser(String username, String email, String contactNumber,
     String password, String height, String weight, String DOB) async {
+  final fcmToken = await FirebaseMessaging.instance.getToken();
   bool success = false;
-  final response = await http.post(Uri.parse(baseUrl + '/signup'), headers: {
+  final response = await http.post(Uri.parse('$baseUrl/signup'), headers: {
     'Accept': '*/*',
     'Content-Type': 'application/json'
   }, body: {
@@ -17,10 +19,11 @@ Future<bool> addUser(String username, String email, String contactNumber,
       "height": height,
       "weight": weight,
       "dob": DOB,
-      "phone_number": contactNumber
+      "phone_number": contactNumber,
+      "fcmtoken": fcmToken
     }
   });
-  if (response.statusCode != 200) {
+  if (response.statusCode != 201) {
     throw Exception('Failed to post data');
   }
   if (response.statusCode == 201) {
@@ -31,13 +34,13 @@ Future<bool> addUser(String username, String email, String contactNumber,
 
 Future<bool> sendOTP(String contactNumber) async {
   bool success = false;
-  final response = await http.post(Uri.parse(baseUrl + '/send_otp'),
+  final response = await http.post(Uri.parse('$baseUrl/send_otp'),
       headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
       body: {"phone_number": contactNumber});
-  if (response.statusCode != 201) {
-    throw Exception('Failed to post data');
+  if (response.statusCode != 200) {
+    throw Exception('Failed to generate OTP');
   }
-  if (response.statusCode == 201) {
+  if (response.statusCode == 200) {
     success = true;
   }
   return success;
@@ -45,7 +48,7 @@ Future<bool> sendOTP(String contactNumber) async {
 
 Future<bool> verifyOTP(String OTP, String contactNumber) async {
   bool success = false;
-  final response = await http.post(Uri.parse(baseUrl + '/verify_otp'),
+  final response = await http.post(Uri.parse('$baseUrl/verify_otp'),
       headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
       body: {"code": OTP, "phone_number": contactNumber});
   if (response.statusCode != 200) {
