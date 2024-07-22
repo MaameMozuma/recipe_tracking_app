@@ -1,11 +1,10 @@
 import json
-import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials
 import os
 import hashlib
 import requests
 from dotenv import load_dotenv
-from flask import jsonify
+
 import re
 
 # Setup collections
@@ -13,15 +12,12 @@ load_dotenv()
 cred = credentials.Certificate(os.getenv("firebase_cred"))
 
 
-
-
-
 def valid_login_fields(request):
     """Verifies that a login request contains
     only the required fields"""
 
     data = request.get_json()
-    necessary_fields = ['username','password']
+    necessary_fields = ['username','password','fcmtoken']
 
     for element in data:
         if element not in necessary_fields:
@@ -50,7 +46,7 @@ def valid_signup_fields(request):
 
     data = request.get_json()
     necessary_fields = ['username', 'password', 'email', 'height', 'dob', 'weight',
-                        'phone_number']
+                        'phone_number', 'fcmtoken']
 
     # check num of fields is correct
     if len(data) != len(necessary_fields):
@@ -137,6 +133,7 @@ def clean_signup_fields(request):
                     'height' : data.get('height').strip(),
                     'dob' : data.get('dob'),
                     'weight' : data.get('weight'),
+                    'fcmtoken' : data.get('fcmtoken')
                     }
 
     return cleaned_data
@@ -214,6 +211,35 @@ def verify_and_return_goals(request):
         return False, data
 
     return True, data
+
+
+def validate_update_fields(request):
+    """Validates sign up fields to ensure that the data entered
+    is valid"""
+
+    data = request.get_json()
+    height = float(data['height'])
+    weight = float(data['weight'])
+    number = data['phone_number']
+
+    # check height
+    if height >= 215 or height <= 60:
+        return False
+
+    # check weight
+    if weight >= 200 or weight <=30:
+        return False
+
+    # check number
+    if len(number) >= 13 or len(number) <10:
+        return False
+
+    return True
+
+
+
+
+
 
 
 

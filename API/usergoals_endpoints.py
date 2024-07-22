@@ -1,8 +1,13 @@
-from __main__ import app, jwt_required, get_jwt_identity
-from __main__ import jsonify, users
-import helpers as h
 from flask import request, jsonify
+from api_config import app, db
+import os
+from dotenv import load_dotenv
+from flask_jwt_extended import get_jwt_identity, jwt_required
+import helpers as h
 
+load_dotenv()
+
+users = db.collection("user")
 
 @app.route('/set_goals', methods=['PATCH'])
 @jwt_required()

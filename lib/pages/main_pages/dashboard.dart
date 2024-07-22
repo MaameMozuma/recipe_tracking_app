@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '/pages/sub_pages/user_statistics.dart';
-import '/pages/widgets/circle_avatar.dart';
-import '/pages/widgets/progress_card.dart';
+import 'package:team_proj_leanne/pages/sub_pages/user_statistics.dart';
+import 'package:team_proj_leanne/pages/widgets/circle_avatar.dart';
+import 'package:team_proj_leanne/pages/widgets/progress_card.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
