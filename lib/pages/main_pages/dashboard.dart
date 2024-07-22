@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:team_proj_leanne/controllers/dashboard_controller.dart';
+import 'package:team_proj_leanne/model/dashboard_stat.dart';
 import 'package:team_proj_leanne/pages/sub_pages/user_statistics.dart';
 import 'package:team_proj_leanne/pages/widgets/circle_avatar.dart';
+import 'package:team_proj_leanne/pages/widgets/custom_graph.dart';
+import 'package:team_proj_leanne/pages/widgets/custom_monthly_graph.dart';
 import 'package:team_proj_leanne/pages/widgets/progress_card.dart';
 
 class Dashboard extends StatefulWidget {
@@ -11,7 +15,20 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  String selectedOption = 'Daily';
+  late String selectedOption;
+  late Future<DashboardStat> futureData;
+  late String category;
+
+  final DashboardController _controller = DashboardController();
+  String? previousOption;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedOption = 'Week';
+    category = 'Steps';
+    futureData = _controller.getStepSummary(); // Default to weekly steps
+  }
 
   void updateSelectedOption(String option) {
     setState(() {
@@ -70,91 +87,152 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
       ),
-      body: Column(
-        // crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                buildOption('Day'),
-                buildOption('Week'),
-                buildOption('Month'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 5.0),
-          Container(
-            width: double.infinity,
-            color: Colors.grey,
-            height: 2,
-          ),
-          const SizedBox(height: 20.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Container(
-              color: const Color.fromARGB(255, 237, 234, 234),
-              width: double.infinity,
-              height: 300,
-              child: Center(
-                child: Text(
-                  'Displaying ${selectedOption.toLowerCase()} data',
-                  style: const TextStyle(fontSize: 18.0),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.circle,
-                      color: Color.fromARGB(255, 120, 82, 174),
+      body: FutureBuilder<DashboardStat>(
+        future: futureData,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData) {
+            return const Center(child: Text('No data available'));
+          } else {
+            final data = snapshot.data;
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: 200,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              buildOption('Week'),
+                              buildOption('Month'),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: 40,
+                          width: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(7)),
+                          child: PopupMenuButton<String>(
+                            icon: const Padding(
+                              padding: EdgeInsets.only(bottom: 16),
+                              child: Icon(
+                                Icons.filter_list,
+                                color: Color.fromARGB(255, 120, 82, 174),
+                              ),
+                            ),
+                            onSelected: (value) {
+                              setState(() {
+                                if (value != category) {
+                                  category = value;
+                                  futureData = value == 'Steps'
+                                      ? _controller
+                                          .getStepSummary() // Fetch weekly data
+                                      : _controller
+                                          .getCaloriesSummary(); // Fetch calorie data
+                                }
+                              });
+                              // updateFilteredBuildings(searchController.text);
+                            },
+                            itemBuilder: (BuildContext context) {
+                              List<String> categories = [
+                                'Steps',
+                                'Calories'
+                              ]; // Replace with your categories
+                              return categories.map((String category) {
+                                return PopupMenuItem<String>(
+                                  value: category,
+                                  child: Text(category),
+                                );
+                              }).toList();
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      'Avg. Calorie Intake',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                      ),
-                    )
-                  ],
-                ),
-                Text(
-                  '2457kcal',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
                   ),
-                )
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          const Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ProgressCard(),
-                ProgressCard(),
-              ],
-            ),
-          )
-        ],
+                  const SizedBox(height: 5.0),
+                  Container(
+                    width: double.infinity,
+                    color: Colors.grey,
+                    height: 2,
+                  ),
+                  const SizedBox(height: 20.0),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: SizedBox(
+                      height: 300,
+                      child: selectedOption == 'Week'
+                          ? CustomGraph(data: data!.weeklyData)
+                          : CustomMonthlyGraph(data: data!.monthlyData),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // const Padding(
+                  //   padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       Row(
+                  //         children: [
+                  //           Icon(
+                  //             Icons.circle,
+                  //             color: Color.fromARGB(255, 120, 82, 174),
+                  //           ),
+                  //           SizedBox(width: 10),
+                  //           Text(
+                  //             'Avg. Calorie Intake',
+                  //             style: TextStyle(
+                  //               fontWeight: FontWeight.w800,
+                  //               fontSize: 16,
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //       Text(
+                  //         '2457kcal',
+                  //         style: TextStyle(
+                  //           fontWeight: FontWeight.w800,
+                  //           fontSize: 16,
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ProgressCard(
+                          mainText: data.weeklyTotal.toString(),
+                          subText: category == 'Steps' ? 'Steps' : 'Cals',
+                          type: 'Weekly',
+                        ),
+                        ProgressCard(
+                          mainText: data.monthlyTotal.toString(),
+                          subText: category == 'Steps' ? 'Steps' : 'Cals',
+                          type: 'Monthly',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        },
       ),
     );
   }
@@ -176,14 +254,13 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           const SizedBox(height: 1.0), // Spacer between text and underline
-
           Container(
             width: 50.0,
             height: 2.0,
             color: isSelected
                 ? const Color.fromARGB(255, 120, 82, 174)
                 : Colors.white,
-          )
+          ),
         ],
       ),
     );

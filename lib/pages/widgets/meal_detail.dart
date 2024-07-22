@@ -1,10 +1,13 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 class MealDetailCard extends StatefulWidget {
   final String mealName;
-  final int mealCalories;
+  final double mealCalories;
   final String mealImage;
   final List<Map<String, dynamic>> mealIngredients;
+  final VoidCallback onDelete;
 
   const MealDetailCard({
     super.key,
@@ -12,6 +15,7 @@ class MealDetailCard extends StatefulWidget {
     required this.mealCalories,
     required this.mealImage,
     required this.mealIngredients,
+    required this.onDelete,
   });
 
   @override
@@ -32,10 +36,34 @@ class _MealDetailCardState extends State<MealDetailCard> {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(widget.mealImage),
-                ),
+                ClipOval(
+              child: widget.mealImage.isNotEmpty
+                  ? Image.network(
+                      widget.mealImage,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                    // Handle image loading error
+                    return Container(
+                      width: 55,
+                      height: 55,
+                      color:
+                          Colors.grey[300], // Background color for error state
+                      child: Icon(
+                        Icons.fastfood, // Default meal icon
+                        size: 30,
+                        color: Colors.grey[600],
+                      ),
+                    );
+                  },
+                    )
+                  : const Icon(
+                      Icons.fastfood,
+                      size: 100,
+                      color: Colors.grey,
+                    ),
+            ),
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +86,7 @@ class _MealDetailCardState extends State<MealDetailCard> {
                 ),
                 const Spacer(),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: widget.onDelete,
                   icon: const Icon(Icons.delete),
                 ),
               ],
@@ -78,7 +106,7 @@ class _MealDetailCardState extends State<MealDetailCard> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(ingredient['name']),
+                    Text(ingredient['item']),
                     Text('${ingredient['calories']} cals'),
                   ],
                 ),

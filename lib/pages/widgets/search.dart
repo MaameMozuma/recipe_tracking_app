@@ -6,11 +6,13 @@ class CustomSearchBar extends StatefulWidget {
   final String placeholder;
   final Future<List<Meal>> Function(String) filterMeals;
   final Function(List<Meal>) onFilteredData;
+  final List<Meal> originalMeals; 
 
   const CustomSearchBar({super.key,
     required this.placeholder,
     required this.filterMeals,
     required this.onFilteredData,
+    required this.originalMeals
   });
 
   @override
@@ -32,6 +34,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     //_searchController.text = widget.placeholder;
     return TextField( ///used to create the search bar
                   controller: _searchController,
+                  keyboardType: TextInputType.text,
                   decoration: InputDecoration(
                     hintText: widget.placeholder,
                     hintStyle: const TextStyle(color: Color.fromRGBO(202, 201, 201, 1)),
@@ -57,9 +60,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                       widget.onFilteredData(filteredData);
                     }
                     else{
-                      setState(() {
-                        widget.onFilteredData([]);
-                      });
+                      widget.onFilteredData(List.from(widget.originalMeals)); 
                     } 
                   }           
                 );

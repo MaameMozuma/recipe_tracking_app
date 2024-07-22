@@ -1,9 +1,11 @@
 import 'dart:io';
-
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
+import 'package:team_proj_leanne/controllers/meal_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-
 import '/pages/widgets/custom_btn.dart';
 import '/pages/widgets/text_field.dart';
 
@@ -15,21 +17,167 @@ class AddMealPage extends StatefulWidget {
 }
 
 class _AddMealPageState extends State<AddMealPage> {
+  final MealController _mealController = MealController();
   List<TextEditingController> itemControllers = [];
   List<TextEditingController> qtyControllers = [];
+  TextEditingController mealNameController = TextEditingController();
+  TextEditingController timeHoursController = TextEditingController();
+  TextEditingController timeMinutesController = TextEditingController();
   File? _foodImage;
+  String? _profileImage = "";
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      if (pickedFile != null) {
+    if (pickedFile != null) {
+      setState(() {
         _foodImage = File(pickedFile.path);
-      } else {
-        print('No image selected.');
+      });
+
+      final profilePicUrl = await _uploadImage();
+      if (profilePicUrl != null) {
+        setState(() {
+          _profileImage = profilePicUrl;
+        });
       }
-    });
+    }
+  }
+
+  @override
+  void dispose() {
+    mealNameController.dispose();
+    timeHoursController.dispose();
+    timeMinutesController.dispose();
+    qtyControllers.forEach((controller) => controller.dispose());
+    itemControllers.forEach((controller) => controller.dispose());
+    super.dispose();
+  }
+
+    void _validateHours() {
+    final hours = int.tryParse(timeHoursController.text) ?? 0;
+    if (hours < 0 || hours > 24) {
+      // Optionally, show a validation error or adjust the value
+      timeHoursController.text = (hours.clamp(0, 24)).toString();
+      timeHoursController.selection = TextSelection.fromPosition(
+        TextPosition(offset: timeHoursController.text.length),
+      );
+    }
+  }
+
+  void _validateMinutes() {
+    final minutes = int.tryParse(timeMinutesController.text) ?? 0;
+    if (minutes < 0 || minutes > 59) {
+      // Optionally, show a validation error or adjust the value
+      timeMinutesController.text = (minutes.clamp(0, 59)).toString();
+      timeMinutesController.selection = TextSelection.fromPosition(
+        TextPosition(offset: timeMinutesController.text.length),
+      );
+    }
+  }
+
+  void addMeal() async {
+    // Check if essential fields are empty
+    if (mealNameController.text.isEmpty ||
+        timeHoursController.text.isEmpty ||
+        timeMinutesController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Some fields are empty. Kindly fill them!'),
+        ),
+      );
+      return;
+    }
+
+    // Check if ingredient fields are empty
+    if (itemControllers.isEmpty || qtyControllers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add ingredients!'),
+        ),
+      );
+      return;
+    }
+
+    // Convert itemControllers and qtyControllers to a list of maps
+    List<Map<String, dynamic>> ingredients = [];
+    for (int i = 0; i < itemControllers.length; i++) {
+      String item = itemControllers[i].text;
+      String quantity = qtyControllers[i].text;
+
+      if (item.isNotEmpty && quantity.isNotEmpty) {
+        ingredients.add({
+          'item': item,
+          'quantity': quantity,
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please fill all ingredient fields!'),
+          ),
+        );
+        return;
+      }
+    }
+
+    // Create the meal JSON
+    Map<String, dynamic> mealData = {
+      'meal_name': mealNameController.text,
+      'time_hours': int.parse(timeHoursController.text),
+      'time_minutes': int.parse(timeMinutesController.text),
+      'image_url': _profileImage,
+      'ingredients': ingredients,
+    };
+
+    // Send the meal data to the backend using the MealController
+    try {
+      var response = await _mealController.createMeal(mealData);
+      if (response) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Meal added successfully!'),
+          ),
+        );
+        await Future.delayed(const Duration(seconds: 2));
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to add meal!'),
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle error, maybe show an error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add meal: $e')),
+      );
+    }
+  }
+
+  Future<String?> _uploadImage() async {
+    if (_foodImage == null) return "";
+
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final imagesRef = storageRef
+          .child('meal_images/${DateTime.now().millisecondsSinceEpoch}.png');
+      final uploadTask = imagesRef.putFile(_foodImage!);
+
+      final snapshot = await uploadTask.whenComplete(() {});
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      print("Download URL: $downloadUrl");
+
+      setState(() {
+        _profileImage = downloadUrl;
+      });
+
+      print("Profile image URL updated: $_profileImage");
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
   }
 
   void addIngredientField() {
@@ -43,6 +191,8 @@ class _AddMealPageState extends State<AddMealPage> {
   void initState() {
     super.initState();
     addIngredientField();
+    timeHoursController.addListener(_validateHours);
+    timeMinutesController.addListener(_validateMinutes);
   }
 
   void removeIngredientField(int index) {
@@ -81,12 +231,15 @@ class _AddMealPageState extends State<AddMealPage> {
               ],
             ),
             const SizedBox(height: 35),
-            const LabeledTextField(
-                label: 'Meal Name',
-                placeholder: 'Enter the name of the meal',
-                readOnly: false),
+            LabeledTextField(
+              label: 'Meal Name',
+              placeholder: 'Enter the name of the meal',
+              readOnly: false,
+              keyboardType: TextInputType.text,
+              controller: mealNameController,
+            ),
             const SizedBox(height: 16),
-            const Row(
+            Row(
               children: [
                 Expanded(
                   child: LabeledTextField(
@@ -94,9 +247,10 @@ class _AddMealPageState extends State<AddMealPage> {
                     placeholder: '00 hours',
                     readOnly: false,
                     keyboardType: TextInputType.number,
+                    controller: timeHoursController,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 30,
                 ),
                 Expanded(
@@ -105,6 +259,7 @@ class _AddMealPageState extends State<AddMealPage> {
                     placeholder: '00 minutes',
                     readOnly: false,
                     keyboardType: TextInputType.number,
+                    controller: timeMinutesController,
                   ),
                 ),
               ],
@@ -273,12 +428,19 @@ class _AddMealPageState extends State<AddMealPage> {
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 children: [
-                                  Image.file(
-                                    _foodImage!,
-                                    fit: BoxFit.cover,
-                                    width: 50,
-                                    height: 50,
-                                  ),
+                                  _foodImage != null
+                                      ? Image.file(
+                                          _foodImage!,
+                                          fit: BoxFit.cover,
+                                          width: 50,
+                                          height: 50,
+                                        )
+                                      : Image.network(
+                                          _profileImage!,
+                                          fit: BoxFit.cover,
+                                          width: 50,
+                                          height: 50,
+                                        ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
@@ -297,7 +459,8 @@ class _AddMealPageState extends State<AddMealPage> {
                     child: CustomBtn(
                         text: 'Save',
                         onPressed: () {
-                          Navigator.pop(context);
+                          addMeal();
+                          //Navigator.pop(context);
                         }),
                   ),
                 ],

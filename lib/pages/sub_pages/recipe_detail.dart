@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:team_proj_leanne/controllers/recipe_controller.dart';
 import 'package:team_proj_leanne/model/recipe_model.dart';
 import 'package:team_proj_leanne/pages/sub_pages/create_recipe.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RecipeDetail extends StatefulWidget {
   final Recipe recipe;
@@ -48,6 +49,29 @@ class _RecipeDetailState extends State<RecipeDetail> {
     }
   }
 
+  void openSMSAppWithMessage(String message) async {
+    final Uri smsUri = Uri(
+      scheme: 'sms',
+      path: '', // Leave path empty to not pre-fill any number
+      queryParameters: <String, String>{'body': message},
+    );
+
+    // Check if the URL can be launched
+    if (await canLaunchUrl(smsUri)) {
+      // Launch the URL
+      await launchUrl(smsUri);
+    } else {
+      throw 'Could not launch SMS app';
+    }
+  }
+
+  void _shareRecipe(String recipeId) {
+    String message =
+        "Hey there! I just found this delicious recipe and thought you’d love it too! Here’s a little sneak peek of what’s cooking: \nhttps://api/share_recipe/$recipeId";
+
+    openSMSAppWithMessage(message);
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Recipe>(
@@ -74,29 +98,49 @@ class _RecipeDetailState extends State<RecipeDetail> {
                 child: Container(
                   color: const Color.fromARGB(255, 252, 249, 249),
                   child: Padding(
-                    padding:
-                        const EdgeInsets.only(top: 40.0, left: 10.0, right: 10.0),
+                    padding: const EdgeInsets.only(
+                        top: 40.0, left: 10.0, right: 10.0),
                     child: Column(
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.arrow_back, color: Colors.black),
+                              icon: const Icon(Icons.arrow_back,
+                                  color: Colors.black),
                               onPressed: () {
                                 Navigator.pop(context);
                               },
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.add, color: Colors.black),
-                              onPressed: () {},
-                            ),
+                            // IconButton(
+                            //   icon: const Icon(Icons.add, color: Colors.black),
+                            //   onPressed: () {},
+                            // ),
                           ],
                         ),
                         Center(
-                          child: Image.network(
-                            'https://storage.googleapis.com/mobiledev-f3a76.appspot.com/recipe_images/food-template2.png',
-                          ),
+                          child: recipe.imageUrl != null ? Image.network(
+                  recipe.imageUrl!,
+                  width: 150,
+                  height: 150,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Handle image loading error
+                    return Center(
+                      child: Container(
+                        width: 105,
+                        height: 105,
+                        color:
+                            Colors.grey[300], // Background color for error state
+                        child: Icon(
+                          Icons.fastfood, // Default meal icon
+                          size: 30,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    );
+                  },
+                ): SizedBox(),
                         ),
                       ],
                     ),
@@ -255,26 +299,41 @@ class _RecipeDetailState extends State<RecipeDetail> {
                         );
                       }).toList(),
                     ),
-                    recipe.userRecipe!
-                        ? Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                color: const Color.fromARGB(255, 120, 82, 174),
-                                onPressed: () {
-                                  _navigateToCreateRecipe(context, recipe);
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                color: const Color.fromARGB(255, 120, 82, 174),
-                                onPressed: () async {
-                                  await _deleteRecipe();
-                                },
+                    Row(
+                      children: [
+                        recipe.userRecipe!
+                            ? Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    color:
+                                        const Color.fromARGB(255, 120, 82, 174),
+                                    onPressed: () {
+                                      _navigateToCreateRecipe(context, recipe);
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    color:
+                                        const Color.fromARGB(255, 120, 82, 174),
+                                    onPressed: () async {
+                                      await _deleteRecipe();
+                                    },
+                                  )
+                                ],
                               )
-                            ],
-                          )
-                        : const SizedBox()
+                            : const SizedBox(),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.share,
+                            color: Color.fromARGB(255, 120, 82, 174),
+                          ),
+                          onPressed: () {
+                            _shareRecipe(recipe.recipeId);
+                          },
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

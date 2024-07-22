@@ -79,7 +79,8 @@ def view_account():
             "height": user_data.get("height", ""),
             "weight": user_data.get("weight", ""),
             "dob": user_data.get("dob", ""),
-            "phone_number": user_data.get("phone_number", "")
+            "phone_number": user_data.get("phone_number", ""),
+            "profile_pic_url": user_data.get("profile_pic_url", "")
         }
         return jsonify(response), 200
 
@@ -103,6 +104,7 @@ def update_account():
     if user_doc.exists:
         # Update the user document
         user_ref.update({
+            "profile_pic_url": data.get("profile_pic_url"),
             "phone_number": data.get("phone_number"),
             "height": data.get("height"),
             "weight": data.get("weight")
