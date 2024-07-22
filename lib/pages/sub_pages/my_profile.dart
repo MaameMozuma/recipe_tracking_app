@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:team_proj_leanne/model/user_profile.dart';
-import 'package:team_proj_leanne/pages/sub_pages/profile_detail.dart';
 import 'package:team_proj_leanne/pages/widgets/custom_app_bar.dart';
+import 'package:team_proj_leanne/pages/widgets/profile_detail.dart';
 
 import '../../services/get_user_detail.dart';
 

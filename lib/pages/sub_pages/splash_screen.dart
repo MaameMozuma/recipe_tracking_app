@@ -1,20 +1,45 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_proj_leanne/pages/sub_pages/landing_page.dart';
+
+import '../widgets/custom_bottom_nav_bar.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 
+Future<bool> isLoggedIn() async {
+  bool isLoggedIn = false;
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final String? token = prefs.getString('auth_token');
+  if (token.toString().isNotEmpty) {
+    isLoggedIn = true;
+  }
+  return isLoggedIn;
+}
+
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(
-        const Duration(seconds: 5),
-        () => Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const LandingPage())));
+    Timer(const Duration(seconds: 3), () async {
+      if (await isLoggedIn()) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const customBottomNavigationBar(initialPageIndex: 0)),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LandingPage()),
+        );
+      }
+    });
   }
 
   @override

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Card</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            position: relative;
+            text-align: center;
+            padding: 10px;
+        }
+        .header img {
+            width: 100%;
+            border-bottom-left-radius: 50%;
+            border-bottom-right-radius: 50%;
+        }
+        .header .actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            width: 50px;
+        }
+        .header .actions button {
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .content .info {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            color: #757575;
+        }
+        .content .details {
+            margin-bottom: 20px;
+            color: #757575;
+        }
+        .content .section {
+            margin-bottom: 20px;
+        }
+        .content .section h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .content .section h2::before {
+            content: "\1F958";
+            font-size: 20px;
+            margin-right: 10px;
+        }
+        .content .section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .content .section ul li {
+            margin-bottom: 5px;
+        }
+        .content .steps h2::before {
+            content: "\1F4DC";
+        }
+        .content .steps p {
+            margin: 10px 0;
+        }
+        .content .steps p span {
+            font-weight: bold;
+        }
+            .signup-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .signup-section .small-text {
+            color: #800080; /* Purple color */
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .signup-button {
+            background-color: #800080; /* Purple color */
+            color: #ffffff; /* White text */
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .signup-button:hover {
+            background-color: #6a006a; /* Dark purple on hover */
+        }
+
+        ul {
+            list-style-type: circle;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src= '{{ data.image_url }}' alt="Avocado Toast">
+            <div class="actions">
+<!--                <button>&#8592;</button>-->
+<!--                <button>&#43;</button>-->
+            </div>
+        </div>
+        <div class="content">
+            <h1> {{ data.recipe_name }} </h1>
+            <div class="info">
+<!--                <span>245kcal</span>-->
+                <span> {{ data.duration }} min</span>
+            </div>
+            <div class="details">
+                <p> {{ data.details }} </p>
+            </div>
+            <div class="section">
+                <h2>Ingredients</h2>
+                <ul>
+                    {% for ingredient in data.ingredients %}
+                       <li>{{ ingredient.get('item') }}, <b> Qty:</b> {{ ingredient.get('quantity') }} </li>
+                    {% endfor %}
+                </ul>
+            </div>
+                <div class="section steps">
+                    <h2>Steps</h2>
+                        {% for step in data.steps %}
+                            {% for key, value in step.items() %}
+                                <p><span>{{ key }}:</span> {{ value }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                </div>
+                <div class="signup-section">
+                    <p class="small-text">Don't have an account? Download Nutripal now.</p>
+                    <button class="signup-button">Sign up now!</button>
+                </div>
+        </div>
+    </div>
+</body>
+</html>
