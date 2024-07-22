@@ -4,14 +4,11 @@ class FormButton extends StatelessWidget {
   final double height;
   final double width;
   final String content;
-  final dynamic route;
-  final dynamic action;
+
   FormButton({
     required this.height,
     required this.width,
     required this.content,
-    this.route,
-    this.action,
   });
 
   @override
@@ -31,9 +28,7 @@ class FormButton extends StatelessWidget {
           },
         ),
       ),
-      onPressed: () {
-        action();
-      },
+      onPressed: () {},
       child: Text(
         content,
         style: const TextStyle(

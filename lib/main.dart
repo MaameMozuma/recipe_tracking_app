@@ -1,12 +1,10 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
-import 'package:team_proj_leanne/pages/sub_pages/splash_screen.dart';
-//import 'package:team_proj_leanne/pages/sub_pages/add_meal.dart';
-//import 'package:team_proj_leanne/pages/sub_pages/edit_user.dart';
-import 'package:team_proj_leanne/pages/widgets/custom_bottom_nav_bar.dart';
 //import 'package:team_proj_leanne/pages/sub_pages/view_all_meals.dart';
 // import 'package:Firebase';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:team_proj_leanne/pages/sub_pages/splash_screen.dart';
+
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -30,19 +28,18 @@ Future<void> main() async {
 }
 
 Future<void> initialize_notifications() async {
-  final notificationSettings = await FirebaseMessaging.instance.requestPermission(provisional: true);
+  final notificationSettings =
+      await FirebaseMessaging.instance.requestPermission(provisional: true);
   final fcmToken = await FirebaseMessaging.instance.getToken();
 
   print(fcmToken);
 
-  FirebaseMessaging.instance.onTokenRefresh
-      .listen((fcmToken) {
+  FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
     // TODO: If necessary send token to application server.
 
     // Note: This callback is fired at each app startup and whenever a new
     // token is generated.
-  })
-      .onError((err) {
+  }).onError((err) {
     // Error getting token.
   });
 }

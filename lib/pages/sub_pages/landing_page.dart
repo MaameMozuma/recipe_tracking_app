@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:team_proj_leanne/pages/sub_pages/login.dart';
 import 'package:team_proj_leanne/pages/sub_pages/sign_up.dart';
-import 'package:team_proj_leanne/pages/widgets/form_buttons.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -37,7 +36,8 @@ class LandingPage extends StatelessWidget {
                             children: [
                               TextSpan(
                                   style: TextStyle(
-                                      color: Color.fromRGBO(120, 82, 174, 1),
+                                      color:
+                                          const Color.fromRGBO(120, 82, 174, 1),
                                       fontSize: pageWidth * 0.07,
                                       fontWeight: FontWeight.bold),
                                   text: 'Healthy '),
@@ -51,11 +51,41 @@ class LandingPage extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: pageHeight * 0.05),
-                        FormButton(
-                            height: pageHeight * 0.09,
-                            width: pageWidth * 0.87,
-                            content: 'Log In',
-                            route: LoginPage()),
+                        ElevatedButton(
+                          style: ButtonStyle(
+                            shape:
+                                WidgetStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0))),
+                            fixedSize: WidgetStateProperty.all<Size>(Size(
+                              pageWidth * 0.87,
+                              pageHeight * 0.09,
+                            )), // Button width and height
+                            backgroundColor:
+                                WidgetStateProperty.resolveWith<Color>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.pressed)) {
+                                  return Colors.transparent;
+                                }
+                                return const Color.fromRGBO(230, 230, 250, 1);
+                              },
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginPage()));
+                          },
+                          child: const Text(
+                            'Log In',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Colors.black),
+                          ),
+                        ),
                         SizedBox(height: pageHeight * 0.03),
                         GestureDetector(
                           onTap: () {
@@ -69,7 +99,7 @@ class LandingPage extends StatelessWidget {
                             "Register",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Color.fromRGBO(120, 81, 169, 1),
+                                color: const Color.fromRGBO(120, 81, 169, 1),
                                 fontWeight: FontWeight.bold,
                                 fontSize: pageWidth * 0.05),
                           ),
