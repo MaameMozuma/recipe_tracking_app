@@ -32,5 +32,3 @@ def set_goals():
 
     else:
         return jsonify({"msg":"failed to update steps"}), 500
-
-

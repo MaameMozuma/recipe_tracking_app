@@ -74,3 +74,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsI
 GET http://127.0.0.1:5000/view_account
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMDgyNDU0OSwianRpIjoiM2U1YTY5MTQtZGM3Ni00ODllLWFkMTctODg1NGEwOTBkYTcyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IkFkbWluMyIsIm5iZiI6MTcyMDgyNDU0OSwiY3NyZiI6ImE3NjA5MzcxLWE1OGYtNDI1Ny04NzQ5LTMzMGFlNDU3M2VhOSIsImV4cCI6MTcyMDgyNTQ0OX0.3uHEYu_T-EV_vGX6RudV_ISUbzcs7-pwOdkX-aJ4Jmo
+
+
+
+### Share recipe
+GET http://127.0.0.1:5000/share_recipe/9somdz7UJIARzwAddZms
+Content-Type: application/json
