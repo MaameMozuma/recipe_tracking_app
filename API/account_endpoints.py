@@ -16,21 +16,26 @@ def login():
     global users
     data = request.get_json()
 
-    if h.valid_login_fields(request) and h.verified_credentials(users, request):
-        username = request.json.get("username", None)
-        print(username)
-        expires = timedelta(days=30)
-        access_token = create_access_token(username, expires_delta=expires)
 
-        # Update notification token
-        user_ref = users.document(username)
-        user_ref.update({'fcmtoken': data.get('fcmtoken')})
-        print(f"Updated fcmtoken for user {username}")
+    try:
+        if h.valid_login_fields(request) and h.verified_credentials(users, request):
+            username = request.json.get("username", None)
+            print(username)
+            expires = timedelta(days=30)
+            access_token = create_access_token(username, expires_delta=expires)
 
-        return jsonify(access_token = access_token), 200
+            # Update notification token
+            user_ref = users.document(username)
+            user_ref.update({'fcmtoken': data.get('fcmtoken')})
+            print(f"Updated fcmtoken for user {username}")
 
-    else:
-        return jsonify({"msg": "Bad username or password"}), 400
+            return jsonify(access_token = access_token), 200
+
+        else:
+            return jsonify({"msg": "Bad username or password"}), 400
+    except Exception as e:
+        print(e)
+        return jsonify({"msg": "An error occured"}), 400
 
 
 @app.route('/signup', methods=['POST'])
@@ -121,7 +126,7 @@ def update_account():
 
 
 
-@app.route('/send_otp', methods=['GET'])
+@app.route('/send_otp', methods=['POST'])
 def send_otp():
     """Sends an OTP to the client based on the provided phone number"""
 

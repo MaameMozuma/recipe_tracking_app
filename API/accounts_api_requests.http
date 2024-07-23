@@ -32,20 +32,20 @@ Content-Type: application/json
 }
 
 ### Send OTP to client
-GET http://127.0.0.1:5000/send_otp
+POST https://us-central1-mobiledev-428400.cloudfunctions.net/nutripal_live1/send_otp
 Content-Type: application/json
 
 {
-  "phone_number" : "233556207957"
+  "phone_number" : "2330556207957"
 }
 
 ### Verify client OTP
-POST http://127.0.0.1:5000/verify_otp
+POST https://us-central1-mobiledev-428400.cloudfunctions.net/nutripal_live1/verify_otp
 Content-Type: application/json
 
 {
-  "code" : 606953,
-  "phone_number" : "233556207957"
+  "code" : 105508,
+  "phone_number" : "2330556207957"
 }
 
 ### Set user goals

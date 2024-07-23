@@ -9,15 +9,23 @@ String baseUrl =
     'https://us-central1-mobiledev-428400.cloudfunctions.net/nutripal_live1';
 
 Future<bool> loginUser(String username, String password) async {
+  print(username);
+  print(password);
   final fcmToken = await FirebaseMessaging.instance.getToken();
   bool success = false;
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final loginData = UserLogin(
-      username: username, password: password, fcmtoken: fcmToken.toString());
+  final loginData = {
+            "username" : username,
+            "password" : password,
+            "fcmtoken" : fcmToken
+          };
+
+  // print(loginData.toJson());
 
   final response = await http.post(Uri.parse('$baseUrl/login'),
       headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
-      body: jsonEncode(loginData.toJson()));
+      body: jsonEncode(loginData));
+
   if (response.statusCode != 200) {
     throw Exception('Failed to Login');
   }

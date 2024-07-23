@@ -11,17 +11,17 @@ Future<bool> addUser(String username, String email, String contactNumber,
     String password, String height, String weight, String DOB) async {
   final fcmToken = await FirebaseMessaging.instance.getToken();
   bool success = false;
-  final Data = UserProfile(
-      username: username,
-      weight: weight,
-      height: height,
-      telno: contactNumber,
-      dob: DOB,
-      email: email,
-      fcmtoken: fcmToken.toString());
+  final Data = {
+      "username": username,
+      "weight": weight,
+      "height": height,
+      "telno": contactNumber,
+      "dob": DOB,
+      "email": email,
+      "fcmtoken": fcmToken.toString()};
   final response = await http.post(Uri.parse('$baseUrl/signup'),
       headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
-      body: jsonEncode(Data.toJson()));
+      body: jsonEncode(Data));
   if (response.statusCode != 201) {
     throw Exception('Failed to post data');
   }
