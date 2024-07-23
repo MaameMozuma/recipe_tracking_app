@@ -28,8 +28,8 @@ class LoginPageState extends State<LoginPage> {
   }
 
   Future<bool> submitData() async {
-    Future<bool> status =
-        loginUser(myUsernameController.text, myPasswordController.text);
+    bool status =
+        await loginUser(myUsernameController.text, myPasswordController.text);
     return status;
   }
 
@@ -121,7 +121,7 @@ class LoginPageState extends State<LoginPage> {
                         ),
                         onPressed: () async {
                           bool success = await submitData();
-                          if (success == true) {
+                          if (success) {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(

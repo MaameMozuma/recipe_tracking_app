@@ -17,7 +17,7 @@ Future<bool> loginUser(String username, String password) async {
 
   final response = await http.post(Uri.parse('$baseUrl/login'),
       headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
-      body: {jsonEncode(loginData.toJson())});
+      body: jsonEncode(loginData.toJson()));
   if (response.statusCode != 200) {
     throw Exception('Failed to Login');
   }

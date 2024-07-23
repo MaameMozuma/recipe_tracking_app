@@ -8,6 +8,7 @@ class UserProfile {
   final String telno;
   final String email;
   final String fcmtoken;
+  final dynamic profile_pic_url;
 
   UserProfile(
       {required this.weight,
@@ -16,7 +17,8 @@ class UserProfile {
       required this.telno,
       required this.dob,
       required this.email,
-      required this.fcmtoken});
+      required this.fcmtoken,
+      this.profile_pic_url});
 
   Map<String, dynamic> toMap() {
     return {
@@ -26,7 +28,8 @@ class UserProfile {
       'phone_number': telno,
       'email': email,
       'username': username,
-      'fcmtoken': fcmtoken
+      'fcmtoken': fcmtoken,
+      'profile_pic_url': profile_pic_url
     };
   }
 
@@ -39,19 +42,20 @@ class UserProfile {
       weight: map['weight'] ?? '',
       dob: map['dob'] ?? '',
       fcmtoken: map['fcmtoken'] ?? '',
+      profile_pic_url: map['profile_pic_url'] ?? '',
     );
   }
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      telno: json['phone_number'],
-      email: json['email'],
-      height: json['height'],
-      weight: json['weight'],
-      dob: json['dob'],
-      username: json['username'],
-      fcmtoken: json['fcmtoken'],
-    );
+        telno: json['phone_number'],
+        email: json['email'],
+        height: json['height'],
+        weight: json['weight'],
+        dob: json['dob'],
+        username: json['username'],
+        fcmtoken: json['fcmtoken'],
+        profile_pic_url: json['profile_pic_url']);
   }
 
   String toJson() => json.encode(toMap());

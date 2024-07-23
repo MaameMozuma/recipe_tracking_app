@@ -1,13 +1,17 @@
 import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_proj_leanne/model/recipe_model.dart';
 import 'package:team_proj_leanne/services/api_service.dart';
 
 class RecipeController {
-  final token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTQzMTgzNCwianRpIjoiOTlmMjU2NDYtYjBjNi00ZTk4LTg2M2MtYzkyNDcyZTcxZTBiIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IkFkbWluMyIsIm5iZiI6MTcyMTQzMTgzNCwiZXhwIjoxNzI0MDIzODM0fQ.UbpT5ykTzGPMnuKVEPx8n_6D7Q192D1sXdfbmpQWLMg";
+  //final token =
+  //"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTQzMTgzNCwianRpIjoiOTlmMjU2NDYtYjBjNi00ZTk4LTg2M2MtYzkyNDcyZTcxZTBiIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IkFkbWluMyIsIm5iZiI6MTcyMTQzMTgzNCwiZXhwIjoxNzI0MDIzODM0fQ.UbpT5ykTzGPMnuKVEPx8n_6D7Q192D1sXdfbmpQWLMg";
   final ApiService _apiService = ApiService();
 
   Future<List<Recipe>> getAllRecipes() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.get('get_all_recipes', token: token);
 
     if (response.statusCode == 200) {
@@ -22,6 +26,8 @@ class RecipeController {
   }
 
   Future<List<Recipe>> getUserRecipes() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response =
         await _apiService.get('get_all_user_recipes', token: token);
 
@@ -37,6 +43,8 @@ class RecipeController {
   }
 
   Future<Recipe> getRecipeById(String id) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.get('recipes/$id', token: token);
 
     if (response.statusCode == 200) {
@@ -44,14 +52,15 @@ class RecipeController {
       Recipe recipe = Recipe.fromJson(jsonData);
 
       return recipe;
-    } 
-    else {
+    } else {
       throw Exception(
           'Failed to load recipe. Status code: ${response.statusCode}');
     }
   }
 
   Future<void> createRecipe(Recipe recipe) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.post(
       'create_recipe',
       recipe.toJson(),
@@ -64,6 +73,8 @@ class RecipeController {
   }
 
   Future<void> editRecipe(Recipe recipe) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.put(
       'update_recipe',
       recipe.toJson(),
@@ -76,6 +87,8 @@ class RecipeController {
   }
 
   Future<void> deleteRecipe(String recipeId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.delete(
       'delete_recipe/$recipeId',
       token: token,
@@ -85,5 +98,4 @@ class RecipeController {
           'Failed to delete recipe. Status code: ${response.statusCode}');
     }
   }
-  
 }

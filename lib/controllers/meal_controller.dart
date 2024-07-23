@@ -1,19 +1,22 @@
 import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_proj_leanne/model/meal.dart';
 import 'package:team_proj_leanne/services/api_service.dart';
 
 class MealController {
-  final token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTQzMTgzNCwianRpIjoiOTlmMjU2NDYtYjBjNi00ZTk4LTg2M2MtYzkyNDcyZTcxZTBiIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IkFkbWluMyIsIm5iZiI6MTcyMTQzMTgzNCwiZXhwIjoxNzI0MDIzODM0fQ.UbpT5ykTzGPMnuKVEPx8n_6D7Q192D1sXdfbmpQWLMg";
+  //final token =
+  //"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTQzMTgzNCwianRpIjoiOTlmMjU2NDYtYjBjNi00ZTk4LTg2M2MtYzkyNDcyZTcxZTBiIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IkFkbWluMyIsIm5iZiI6MTcyMTQzMTgzNCwiZXhwIjoxNzI0MDIzODM0fQ.UbpT5ykTzGPMnuKVEPx8n_6D7Q192D1sXdfbmpQWLMg";
   final ApiService _apiService = ApiService();
 
-    Future<List<Meal>> getAllMealss() async {
+  Future<List<Meal>> getAllMealss() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.get('get_all_meals', token: token);
 
     if (response.statusCode == 200) {
       List<dynamic> jsonData = jsonDecode(response.body);
-      List<Meal> meals =
-          jsonData.map((data) => Meal.fromJson(data)).toList();
+      List<Meal> meals = jsonData.map((data) => Meal.fromJson(data)).toList();
       return meals;
     } else {
       throw Exception(
@@ -21,25 +24,29 @@ class MealController {
     }
   }
 
-Future<List<Meal>> getUserMeals() async {
-  final response = await _apiService.get('get_all_user_meals', token: token);
+  Future<List<Meal>> getUserMeals() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
+    final response = await _apiService.get('get_all_user_meals', token: token);
 
-  if (response.statusCode == 200) {
-    List<dynamic> jsonData = jsonDecode(response.body);
-    if (jsonData.isEmpty) {
-      // Handle the case where there are no meals
-      print('No meals found for the user.');
-      return []; // Return an empty list
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = jsonDecode(response.body);
+      if (jsonData.isEmpty) {
+        // Handle the case where there are no meals
+        print('No meals found for the user.');
+        return []; // Return an empty list
+      }
+      List<Meal> meals = jsonData.map((data) => Meal.fromJson(data)).toList();
+      return meals;
+    } else {
+      throw Exception(
+          'Failed to load meals. Status code: ${response.statusCode}');
     }
-    List<Meal> meals = jsonData.map((data) => Meal.fromJson(data)).toList();
-    return meals;
-  } else {
-    throw Exception(
-        'Failed to load meals. Status code: ${response.statusCode}');
   }
-}
 
-  Future<Meal> getOneMeal() async{
+  Future<Meal> getOneMeal() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.get('get_meal', token: token);
 
     if (response.statusCode == 200) {
@@ -47,14 +54,15 @@ Future<List<Meal>> getUserMeals() async {
       Meal meal = Meal.fromMap(jsonData);
 
       return meal;
-    } 
-    else {
+    } else {
       throw Exception(
           'Failed to load meal. Status code: ${response.statusCode}');
     }
   }
 
-    Future<bool> createMeal(meal) async {
+  Future<bool> createMeal(meal) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.post(
       'add_meal',
       meal,
@@ -67,6 +75,8 @@ Future<List<Meal>> getUserMeals() async {
   }
 
   Future<void> editMeal(Meal meal) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.put(
       'update_meal',
       meal.toJson(),
@@ -78,7 +88,9 @@ Future<List<Meal>> getUserMeals() async {
     }
   }
 
-    Future<void> deleteMeal(String meal_name) async {
+  Future<void> deleteMeal(String meal_name) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
     final response = await _apiService.delete(
       'delete_meal?meal_name=$meal_name',
       token: token,
@@ -88,5 +100,4 @@ Future<List<Meal>> getUserMeals() async {
           'Failed to delete meal. Status code: ${response.statusCode}');
     }
   }
-
 }

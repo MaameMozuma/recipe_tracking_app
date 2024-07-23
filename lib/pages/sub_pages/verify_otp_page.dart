@@ -7,14 +7,37 @@ const Color accentDarkGreenColor = Color(0xFF115C49);
 const Color accentYellowColor = Color(0xFFFFB612);
 const Color accentOrangeColor = Color(0xFFEA7A3B);
 
-Future<bool> verifyAnOTP(String OTP, String ContactNumber) async {
+Future<bool> verifyAnOTP(
+  String OTP,
+  String ContactNumber,
+) async {
   Future<bool> verified = verifyOTP(OTP, ContactNumber);
   return verified;
 }
 
 class VerifyOTPPage extends StatelessWidget {
-  final String ContactNumber; // Data received from another widget
-  VerifyOTPPage({required this.ContactNumber});
+  final String ContactNumber;
+  final String username;
+  final String height;
+  final String weight;
+  final String dob;
+  final String email;
+  final String password;
+
+  VerifyOTPPage(
+      {required this.ContactNumber,
+      required this.username,
+      required this.height,
+      required this.weight,
+      required this.dob,
+      required this.email,
+      required this.password});
+
+  Future<bool> submitData() async {
+    Future<bool> created = addUser(
+        username, email, '233$ContactNumber', password, height, weight, dob);
+    return created;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,24 +61,35 @@ class VerifyOTPPage extends StatelessWidget {
             showFieldAsBox: true,
             onCodeChanged: (String code) {},
             onSubmit: (String verificationCode) async {
-              if (await verifyAnOTP(verificationCode, ContactNumber) == true) {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return const AlertDialog(
-                        content: Text('Verified'),
-                      );
-                    });
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => LoginPage()));
+              bool status = await verifyAnOTP(verificationCode, ContactNumber);
+              if (status == true) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Verified'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                bool created = await submitData();
+                if (created == true) {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => LoginPage()));
+                } else {
+                  showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (context) {
+                        return const AlertDialog(
+                          content: Text('Could not submit data'),
+                        );
+                      });
+                }
               } else {
                 showDialog(
                     barrierDismissible: true,
                     context: context,
                     builder: (context) {
                       return const AlertDialog(
-                        title: Text("Error"),
-                        content: Text('Verification Failed'),
+                        content: Text('Wrong OTP'),
                       );
                     });
               }
@@ -79,7 +113,17 @@ class VerifyOTPPage extends StatelessWidget {
                 },
               ),
             ),
-            onPressed: () {},
+            onPressed: () async {
+              bool confirmation = await sendOTP(ContactNumber);
+              if (confirmation == true) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('OTP Resent'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
             child: const Text(
               'Resend OTP',
               style: TextStyle(

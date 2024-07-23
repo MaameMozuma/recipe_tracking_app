@@ -21,12 +21,12 @@ Future<bool> addUser(String username, String email, String contactNumber,
       fcmtoken: fcmToken.toString());
   final response = await http.post(Uri.parse('$baseUrl/signup'),
       headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
-      body: {jsonEncode(Data.toJson())});
+      body: jsonEncode(Data.toJson()));
   if (response.statusCode != 201) {
     throw Exception('Failed to post data');
   }
   if (response.statusCode == 201) {
-    sendOTP(contactNumber);
+    success = true;
   }
   return success;
 }
@@ -38,7 +38,7 @@ Future<bool> sendOTP(String contactNumber) async {
   bool success = false;
   final response = await http.post(Uri.parse('$baseUrl/send_otp'),
       headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
-      body: {jsonEncode(requestBody)});
+      body: jsonEncode(requestBody));
   if (response.statusCode != 200) {
     throw Exception('Failed to generate OTP');
   }
@@ -56,7 +56,7 @@ Future<bool> verifyOTP(String OTP, String contactNumber) async {
   bool success = false;
   final response = await http.post(Uri.parse('$baseUrl/verify_otp'),
       headers: {'Accept': '*/*', 'Content-Type': 'application/json'},
-      body: {jsonEncode(requestBody)});
+      body: jsonEncode(requestBody));
   if (response.statusCode != 200) {
     throw Exception('Failed to post data');
   }
