@@ -43,19 +43,6 @@ class SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
-  Future<bool> submitData() async {
-    Future<bool> created = addUser(
-      myUsernameController.text,
-      myEmailController.text,
-      myPasswordController.text,
-      myHeightController.text,
-      myWeightController.text,
-      '233${myPhoneNumController.text}',
-      dateController.text,
-    );
-    return created;
-  }
-
   @override
   Widget build(BuildContext context) {
     final pageHeight = MediaQuery.of(context).size.height;
@@ -251,20 +238,20 @@ class SignupPageState extends State<SignupPage> {
                       Padding(
                         padding: EdgeInsets.all(pageHeight * 0.02),
                         child: SignUpFormFieldPassword(
-                          FontColor: const Color.fromRGBO(173, 172, 172, 1),
-                          FontSize: 15,
-                          Width: pageWidth * 0.87,
-                          Height: pageHeight * 0.07,
-                          Placeholder: 'Password',
-                          Controller: myPasswordController,
-                          Validator: (value) {
-                            if (myPasswordController.text !=
-                                myConfirmPasswordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
-                        ),
+                            FontColor: const Color.fromRGBO(173, 172, 172, 1),
+                            FontSize: 15,
+                            Width: pageWidth * 0.87,
+                            Height: pageHeight * 0.07,
+                            Placeholder: 'Password',
+                            Controller: myPasswordController,
+                            Validator: (value) {
+                              RegExp regex = RegExp(
+                                  r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+                              if (!regex.hasMatch(value)) {
+                                return 'Must be 8 characters, 1 upper case \n 1 number, 1 special character';
+                              }
+                              return null;
+                            }),
                       ),
                       Padding(
                         padding: EdgeInsets.all(pageHeight * 0.02),
@@ -273,9 +260,6 @@ class SignupPageState extends State<SignupPage> {
                             if (myPasswordController.text !=
                                 myConfirmPasswordController.text) {
                               return 'Passwords do not match';
-                            }
-                            if (myPasswordController.text.length < 4) {
-                              return 'Password must be more than 4 characters';
                             }
                             return null;
                           },
@@ -314,17 +298,24 @@ class SignupPageState extends State<SignupPage> {
                             () async {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Form Validated'),
+                                  content: Text('Sending OTP'),
                                   duration: Duration(seconds: 2),
                                 ),
                               );
-                              bool success = await submitData();
-                              if (success == true) {
+                              String number = '233$myPhoneNumController.text';
+                              bool success = await sendOTP(number);
+                              if (success) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => VerifyOTPPage(
                                       ContactNumber: myPhoneNumController.text,
+                                      username: myUsernameController.text,
+                                      height: myHeightController.text,
+                                      weight: myWeightController.text,
+                                      dob: dateController.text,
+                                      email: myWeightController.text,
+                                      password: myPasswordController.text,
                                     ),
                                   ),
                                 );
