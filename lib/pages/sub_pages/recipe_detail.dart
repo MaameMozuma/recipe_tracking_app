@@ -67,7 +67,7 @@ class _RecipeDetailState extends State<RecipeDetail> {
 
   void _shareRecipe(String recipeId) {
     String message =
-        "Hey there! I just found this delicious recipe and thought you’d love it too! Here’s a little sneak peek of what’s cooking: \nhttps://api/share_recipe/$recipeId";
+        "Hey there! I just found this delicious recipe and thought you’d love it too! Here’s a little sneak peek of what’s cooking: \nhttps://us-central1-mobiledev-428400.cloudfunctions.net/nutripal_live1/share_recipe/$recipeId";
 
     openSMSAppWithMessage(message);
   }

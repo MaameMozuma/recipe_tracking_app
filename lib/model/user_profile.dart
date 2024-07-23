@@ -48,14 +48,14 @@ class UserProfile {
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-        telno: json['phone_number'],
-        email: json['email'],
-        height: json['height'],
-        weight: json['weight'],
-        dob: json['dob'],
-        username: json['username'],
-        fcmtoken: json['fcmtoken'],
-        profile_pic_url: json['profile_pic_url']);
+        telno: json['phone_number'] ?? '',
+        email: json['email'] ?? '',
+        height: json['height'] ?? '',
+        weight: json['weight'] ?? '',
+        dob: json['dob'] ?? '',
+        username: json['username'] ?? '',
+        fcmtoken: json['fcmtoken'] ?? '',
+        profile_pic_url: json['profile_pic_url'] ?? '');
   }
 
   String toJson() => json.encode(toMap());

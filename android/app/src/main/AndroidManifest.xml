@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.BODY_SENSORS"/>
 <!-- Provide required visibility configuration for API level 30 and above -->
     <queries>
         <!-- If your app checks for SMS support -->

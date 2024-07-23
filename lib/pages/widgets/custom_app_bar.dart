@@ -7,12 +7,15 @@ class CustomAppBar extends StatelessWidget {
   final Color barColor;
   final Color FontColor;
   final double FontSize;
+  final VoidCallback? onPressed;
+
   CustomAppBar({
     required this.height,
     required this.title,
     required this.barColor,
     required this.FontColor,
     required this.FontSize,
+    this.onPressed,
   });
 
   @override
@@ -41,13 +44,7 @@ class CustomAppBar extends StatelessWidget {
       actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.edit_calendar, color: Colors.black),
-          onPressed: () {
-            Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const EditUser()),
-        );
-            // do something
-          },
+          onPressed: onPressed 
         )
       ],
     );

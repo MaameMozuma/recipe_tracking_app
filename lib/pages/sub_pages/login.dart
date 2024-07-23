@@ -124,7 +124,7 @@ class LoginPageState extends State<LoginPage> {
                                 myUsernameController.text,
                                 myPasswordController.text);
                             if (success) {
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
@@ -163,7 +163,7 @@ class LoginPageState extends State<LoginPage> {
                                 text: "Don't Have an account yet? "),
                             TextSpan(
                                 recognizer: TapGestureRecognizer()
-                                  ..onTap = () => Navigator.push(
+                                  ..onTap = () => Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => SignupPage()),

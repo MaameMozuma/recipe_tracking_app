@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:team_proj_leanne/model/user_profile.dart';
+import 'package:team_proj_leanne/pages/sub_pages/edit_user.dart';
 import 'package:team_proj_leanne/pages/widgets/custom_app_bar.dart';
 import 'package:team_proj_leanne/pages/widgets/profile_detail.dart';
 
@@ -55,6 +56,18 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               height: pageHeight * 0.21,
                               width: pageWidth,
                               child: CustomAppBar(
+                                  onPressed: () async{
+                                    final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const EditUser()));
+                                    if (result == true) {
+                                      setState(() {
+                                        userDetails = fetchProfile();
+                                      });
+                                    }
+                                  },
                                   height: pageHeight * 0.21,
                                   title: 'My Profile',
                                   barColor: Color.fromRGBO(230, 230, 250, 1),
@@ -68,20 +81,20 @@ class _MyProfilePageState extends State<MyProfilePage> {
                             Padding(
                                 padding:
                                     EdgeInsets.only(top: pageHeight * 0.15),
-                                child: const CircleAvatar(
+                                child: CircleAvatar(
                                   backgroundImage: NetworkImage(
-                                      'https://www.woolha.com/media/2020/03/eevee.png'),
+                                      snapshot.data!.profile_pic_url),
                                   minRadius: 30,
                                   maxRadius: 45,
                                 )),
-                            const Text(
-                              'Samuel Blankson',
-                              style: TextStyle(
+                            Text(
+                              snapshot.data!.username,
+                              style: const TextStyle(
                                   color: Colors.black,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold),
                             ),
-                            const Text('+(233) 543 786 897',
+                            Text(snapshot.data!.telno,
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 14,

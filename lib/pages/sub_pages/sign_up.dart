@@ -302,10 +302,10 @@ class SignupPageState extends State<SignupPage> {
                                   duration: Duration(seconds: 2),
                                 ),
                               );
-                              String number = '233$myPhoneNumController.text';
+                              String number = '233${myPhoneNumController.text}';
                               bool success = await sendOTP(number);
                               if (success) {
-                                Navigator.push(
+                                Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => VerifyOTPPage(
@@ -314,7 +314,7 @@ class SignupPageState extends State<SignupPage> {
                                       height: myHeightController.text,
                                       weight: myWeightController.text,
                                       dob: dateController.text,
-                                      email: myWeightController.text,
+                                      email: myEmailController.text,
                                       password: myPasswordController.text,
                                     ),
                                   ),
@@ -354,7 +354,7 @@ class SignupPageState extends State<SignupPage> {
                                 text: "Already Have An Account? "),
                             TextSpan(
                                 recognizer: TapGestureRecognizer()
-                                  ..onTap = () => Navigator.push(
+                                  ..onTap = () => Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => LoginPage()),

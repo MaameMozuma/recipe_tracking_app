@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:team_proj_leanne/controllers/dashboard_controller.dart';
+import 'package:team_proj_leanne/controllers/user_controller.dart';
 import 'package:team_proj_leanne/model/dashboard_stat.dart';
+import 'package:team_proj_leanne/model/user_profile.dart';
 import 'package:team_proj_leanne/pages/sub_pages/user_statistics.dart';
 import 'package:team_proj_leanne/pages/widgets/circle_avatar.dart';
 import 'package:team_proj_leanne/pages/widgets/custom_graph.dart';
@@ -16,10 +18,14 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   late String selectedOption;
-  late Future<DashboardStat> futureData;
+  late DashboardStat futureData;
+  late UserProfile userData;
   late String category;
+  late Future<List<dynamic>> _dashboardFuture;
 
-  final DashboardController _controller = DashboardController();
+  final DashboardController _dashController = DashboardController();
+  final UserController _userController = UserController();
+
   String? previousOption;
 
   @override
@@ -27,7 +33,10 @@ class _DashboardState extends State<Dashboard> {
     super.initState();
     selectedOption = 'Week';
     category = 'Steps';
-    futureData = _controller.getStepSummary(); // Default to weekly steps
+    _dashboardFuture = Future.wait([
+      _dashController.getStepSummary(),
+      _userController.getUserStatistics(),
+    ]);
   }
 
   void updateSelectedOption(String option) {
@@ -38,67 +47,80 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: AppBar(
-          backgroundColor: Colors.white,
-          flexibleSpace: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Good morning',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+    return FutureBuilder<List<dynamic>>(
+      future: _dashboardFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(child: Text('Error: ${snapshot.error}')),
+          );
+        } else if (!snapshot.hasData) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: const Center(child: Text('No data available')),
+          );
+        } else {
+          futureData = snapshot.data![0] as DashboardStat;
+          userData = snapshot.data![1] as UserProfile;
+
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(70),
+              child: AppBar(
+                backgroundColor: Colors.white,
+                flexibleSpace: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Hello',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            Text(
+                              userData.username,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        'Samuel Blankson',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20),
-                      ),
-                    ],
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const UserStatistics(),
+                                ),
+                              );
+                            },
+                            child: MyCircleAvatar(
+                              imageUrl: userData.profile_pic_url,
+                            )),
+                      ],
+                    ),
                   ),
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const UserStatistics(),
-                          ),
-                        );
-                      },
-                      child: const MyCircleAvatar()),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
-      body: FutureBuilder<DashboardStat>(
-        future: futureData,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text('No data available'));
-          } else {
-            final data = snapshot.data;
-            return SingleChildScrollView(
+            body: SingleChildScrollView(
               child: Column(
                 children: [
                   Padding(
@@ -135,20 +157,17 @@ class _DashboardState extends State<Dashboard> {
                               setState(() {
                                 if (value != category) {
                                   category = value;
-                                  futureData = value == 'Steps'
-                                      ? _controller
-                                          .getStepSummary() // Fetch weekly data
-                                      : _controller
-                                          .getCaloriesSummary(); // Fetch calorie data
+                                  _dashboardFuture = Future.wait([
+                                    value == 'Steps'
+                                        ? _dashController.getStepSummary()
+                                        : _dashController.getCaloriesSummary(),
+                                    _userController.getUserStatistics(),
+                                  ]);
                                 }
                               });
-                              // updateFilteredBuildings(searchController.text);
                             },
                             itemBuilder: (BuildContext context) {
-                              List<String> categories = [
-                                'Steps',
-                                'Calories'
-                              ]; // Replace with your categories
+                              List<String> categories = ['Steps', 'Calories'];
                               return categories.map((String category) {
                                 return PopupMenuItem<String>(
                                   value: category,
@@ -173,55 +192,24 @@ class _DashboardState extends State<Dashboard> {
                     child: SizedBox(
                       height: 300,
                       child: selectedOption == 'Week'
-                          ? CustomGraph(data: data!.weeklyData)
-                          : CustomMonthlyGraph(data: data!.monthlyData),
+                          ? CustomGraph(data: futureData.weeklyData)
+                          : CustomMonthlyGraph(data: futureData.monthlyData),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // const Padding(
-                  //   padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  //   child: Row(
-                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //     children: [
-                  //       Row(
-                  //         children: [
-                  //           Icon(
-                  //             Icons.circle,
-                  //             color: Color.fromARGB(255, 120, 82, 174),
-                  //           ),
-                  //           SizedBox(width: 10),
-                  //           Text(
-                  //             'Avg. Calorie Intake',
-                  //             style: TextStyle(
-                  //               fontWeight: FontWeight.w800,
-                  //               fontSize: 16,
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //       Text(
-                  //         '2457kcal',
-                  //         style: TextStyle(
-                  //           fontWeight: FontWeight.w800,
-                  //           fontSize: 16,
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
                   const SizedBox(height: 10),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ProgressCard(
-                          mainText: data.weeklyTotal.toString(),
+                          mainText: futureData.weeklyTotal.toString(),
                           subText: category == 'Steps' ? 'Steps' : 'Cals',
                           type: 'Weekly',
                         ),
                         ProgressCard(
-                          mainText: data.monthlyTotal.toString(),
+                          mainText: futureData.monthlyTotal.toString(),
                           subText: category == 'Steps' ? 'Steps' : 'Cals',
                           type: 'Monthly',
                         ),
@@ -230,10 +218,10 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ],
               ),
-            );
-          }
-        },
-      ),
+            ),
+          );
+        }
+      },
     );
   }
 

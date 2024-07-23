@@ -146,7 +146,7 @@ Future<void> _saveProfile(String telno, BuildContext context) async {
               child: const Text('Ok'),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).pop();
+                Navigator.pop(context, true);
               },
             ),
           ],

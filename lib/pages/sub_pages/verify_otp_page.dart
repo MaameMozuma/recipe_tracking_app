@@ -70,7 +70,7 @@ class VerifyOTPPage extends StatelessWidget {
                   ),
                 );
                 bool created = await addUser(username, email,
-                    '233$ContactNumber', password, height, weight, dob);
+                    ContactNumber, password, height, weight, dob);
                 if (created) {
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => LoginPage()));

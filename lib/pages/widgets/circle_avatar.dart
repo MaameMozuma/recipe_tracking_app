@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MyCircleAvatar extends StatelessWidget {
-  const MyCircleAvatar({super.key});
+  final String imageUrl;
+  const MyCircleAvatar({super.key, required this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +24,9 @@ class MyCircleAvatar extends StatelessWidget {
             height: 30.0,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              image: DecorationImage(
-                image: AssetImage(
-                    'assets/images/profile-icon.png'), // Replace with your image URL
-                fit: BoxFit.cover,
-              ),
+              
             ),
+            child: Image.network(imageUrl, fit: BoxFit.contain,),
           ),
         ),
       ),
