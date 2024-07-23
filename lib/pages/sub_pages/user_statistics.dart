@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pedometer/pedometer.dart';
 import 'package:team_proj_leanne/controllers/user_controller.dart';
 import 'package:team_proj_leanne/pages/sub_pages/my_profile.dart';
 import 'package:team_proj_leanne/pages/widgets/daily_stat_card.dart';
@@ -12,7 +13,42 @@ class UserStatistics extends StatefulWidget {
 }
 
 class _UserStatisticsState extends State<UserStatistics> {
+  late Stream<StepCount> _stepCountStream;
+  String _status = '?', _steps = '?';
   final UserController _userController = UserController();
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+  }
+
+  void onStepCount(StepCount event) {
+    // print(event);
+    setState(() {
+      _steps = event.steps.toString();
+    });
+  }
+
+  void onStepCountError(error) {
+    print('onStepCountError: $error');
+    setState(() {
+      _steps = '!';
+    });
+  }
+
+  void initPlatformState() {
+    // _pedestrianStatusStream = Pedometer.pedestrianStatusStream;
+    // _pedestrianStatusStream
+    //     .listen(onPedestrianStatusChanged)
+    //     .onError(onPedestrianStatusError);
+
+    _stepCountStream = Pedometer.stepCountStream;
+    _stepCountStream.listen(onStepCount).onError(onStepCountError);
+
+    if (!mounted) return;
+  }
+
   DateTime parseDateString(String dateString) {
     final parts = dateString.split('/');
     if (parts.length == 3) {
@@ -197,55 +233,57 @@ class _UserStatisticsState extends State<UserStatistics> {
                   ),
                 ),
               ),
-              body: const Padding(
+              body: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Total',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ProfileCard(),
                         ProfileCard(),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
-                    Text(
+                    const Text(
                       'Daily',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
                             children: [
-                              DailyStatCard(),
-                              SizedBox(
+                              const DailyStatCard(
+                                icon: Icons.sports,
+                              ),
+                              const SizedBox(
                                 height: 10,
                               ),
                               Text(
-                                '40',
-                                style: TextStyle(
+                                _steps,
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 18),
                               ),
-                              Text(
+                              const Text(
                                 'steps',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
@@ -254,9 +292,11 @@ class _UserStatisticsState extends State<UserStatistics> {
                               )
                             ],
                           ),
-                          Column(
+                          const Column(
                             children: [
-                              DailyStatCard(),
+                              DailyStatCard(
+                                icon: Icons.food_bank,
+                              ),
                               SizedBox(
                                 height: 10,
                               ),
@@ -277,10 +317,12 @@ class _UserStatisticsState extends State<UserStatistics> {
                                   ))
                             ],
                           ),
-                          Column(
+                          const Column(
                             // crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              DailyStatCard(),
+                              DailyStatCard(
+                                icon: Icons.work,
+                              ),
                               SizedBox(
                                 height: 10,
                               ),
