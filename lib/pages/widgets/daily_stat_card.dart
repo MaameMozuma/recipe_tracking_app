@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 class DailyStatCard extends StatelessWidget {
-  const DailyStatCard({super.key});
+  final IconData icon;
+  const DailyStatCard({super.key, required this.icon});
 
   @override
   Widget build(BuildContext context) {
-    double progress = 0.7;
+    double progress = 1;
 
     return Stack(
       alignment: Alignment.center,
@@ -21,7 +22,10 @@ class DailyStatCard extends StatelessWidget {
                 Color.fromARGB(255, 120, 82, 174)),
           ),
         ),
-        Icon(Icons.fire_extinguisher, size: 35,)
+        Icon(
+          icon,
+          size: 35,
+        )
       ],
     );
   }
