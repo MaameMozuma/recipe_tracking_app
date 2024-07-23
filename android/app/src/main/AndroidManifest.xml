@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> bd14899d9e438acda7470b6c888f4e3587fa07b3
 <uses-permission android:name="android.permission.INTERNET"/>
 <!-- Provide required visibility configuration for API level 30 and above -->
     <queries>
@@ -18,9 +22,13 @@
             <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>
     </queries>
+<<<<<<< HEAD
 =======
     <uses-permission android:name="android.permission.INTERNET" />
 >>>>>>> 669651eb2b64fc92f5d63d4feb24d3b66d659f54
+=======
+
+>>>>>>> bd14899d9e438acda7470b6c888f4e3587fa07b3
     <application
         android:label="recipe_tracking_app"
         android:name="${applicationName}"
