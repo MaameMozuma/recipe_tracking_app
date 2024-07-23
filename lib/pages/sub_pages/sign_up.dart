@@ -247,7 +247,7 @@ class SignupPageState extends State<SignupPage> {
                             Validator: (value) {
                               RegExp regex = RegExp(
                                   r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
-                              if (!regex.hasMatch(myPasswordController.text)) {
+                              if (!regex.hasMatch(value)) {
                                 return 'Must be 8 characters, 1 upper case \n 1 number, 1 special character';
                               }
                               return null;
@@ -302,7 +302,7 @@ class SignupPageState extends State<SignupPage> {
                                   duration: Duration(seconds: 2),
                                 ),
                               );
-                              String number = '233${myPhoneNumController.text}';
+                              String number = '233$myPhoneNumController.text';
                               bool success = await sendOTP(number);
                               if (success) {
                                 Navigator.push(

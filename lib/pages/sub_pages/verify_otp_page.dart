@@ -7,13 +7,13 @@ const Color accentDarkGreenColor = Color(0xFF115C49);
 const Color accentYellowColor = Color(0xFFFFB612);
 const Color accentOrangeColor = Color(0xFFEA7A3B);
 
-Future<bool> verifyAnOTP(
-  String OTP,
-  String ContactNumber,
-) async {
-  Future<bool> verified = verifyOTP(OTP, ContactNumber);
-  return verified;
-}
+// Future<bool> verifyAnOTP(
+//   String OTP,
+//   String ContactNumber,
+// ) async {
+//   bool verified = await verifyOTP(OTP, ContactNumber);
+//   return verified;
+// }
 
 class VerifyOTPPage extends StatelessWidget {
   final String ContactNumber;
@@ -33,11 +33,11 @@ class VerifyOTPPage extends StatelessWidget {
       required this.email,
       required this.password});
 
-  Future<bool> submitData() async {
-    Future<bool> created = addUser(
-        username, email, '233$ContactNumber', password, height, weight, dob);
-    return created;
-  }
+  // Future<bool> submitData() async {
+  //   bool created = await addUser(
+  //       username, email, '233$ContactNumber', password, height, weight, dob);
+  //   return created;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -61,16 +61,17 @@ class VerifyOTPPage extends StatelessWidget {
             showFieldAsBox: true,
             onCodeChanged: (String code) {},
             onSubmit: (String verificationCode) async {
-              bool status = await verifyAnOTP(verificationCode, ContactNumber);
-              if (status == true) {
+              bool status = await verifyOTP(verificationCode, ContactNumber);
+              if (status) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Verified'),
                     duration: Duration(seconds: 2),
                   ),
                 );
-                bool created = await submitData();
-                if (created == true) {
+                bool created = await addUser(username, email,
+                    '233$ContactNumber', password, height, weight, dob);
+                if (created) {
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => LoginPage()));
                 } else {
@@ -115,7 +116,7 @@ class VerifyOTPPage extends StatelessWidget {
             ),
             onPressed: () async {
               bool confirmation = await sendOTP(ContactNumber);
-              if (confirmation == true) {
+              if (confirmation) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('OTP Resent'),

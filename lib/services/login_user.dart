@@ -22,7 +22,9 @@ Future<bool> loginUser(String username, String password) async {
     throw Exception('Failed to Login');
   }
   if (response.statusCode == 200) {
-    await prefs.setString('auth_token', response.body);
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+    final String token = responseData['access_token'];
+    await prefs.setString('auth_token', token);
     success = true;
   }
   return success;

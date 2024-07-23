@@ -27,11 +27,10 @@ class LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<bool> submitData() async {
-    bool status =
-        await loginUser(myUsernameController.text, myPasswordController.text);
-    return status;
-  }
+  // Future<bool> submitData() async {
+  //   return await loginUser(
+  //       myUsernameController.text, myPasswordController.text);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +119,9 @@ class LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         onPressed: () async {
-                          bool success = await submitData();
+                          bool success = await loginUser(
+                              myUsernameController.text,
+                              myPasswordController.text);
                           if (success) {
                             Navigator.push(
                                 context,
