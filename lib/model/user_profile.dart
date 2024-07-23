@@ -7,6 +7,7 @@ class UserProfile {
   final String dob;
   final String telno;
   final String email;
+  final String fcmtoken;
 
   UserProfile(
       {required this.weight,
@@ -14,7 +15,8 @@ class UserProfile {
       required this.height,
       required this.telno,
       required this.dob,
-      required this.email});
+      required this.email,
+      required this.fcmtoken});
 
   Map<String, dynamic> toMap() {
     return {
@@ -24,6 +26,7 @@ class UserProfile {
       'phone_number': telno,
       'email': email,
       'username': username,
+      'fcmtoken': fcmtoken
     };
   }
 
@@ -35,6 +38,7 @@ class UserProfile {
       height: map['height'] ?? '',
       weight: map['weight'] ?? '',
       dob: map['dob'] ?? '',
+      fcmtoken: map['fcmtoken'] ?? '',
     );
   }
 
@@ -46,6 +50,7 @@ class UserProfile {
       weight: json['weight'],
       dob: json['dob'],
       username: json['username'],
+      fcmtoken: json['fcmtoken'],
     );
   }
 

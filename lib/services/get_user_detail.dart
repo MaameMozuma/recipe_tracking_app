@@ -11,8 +11,7 @@ String baseUrl =
 Future<UserProfile> fetchProfile() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   final String? token = prefs.getString('auth_token');
-  final response =
-      await http.get(Uri.parse(baseUrl + '/view_account'), headers: {
+  final response = await http.get(Uri.parse('$baseUrl/view_account'), headers: {
     'Accept': '*/*',
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token'
