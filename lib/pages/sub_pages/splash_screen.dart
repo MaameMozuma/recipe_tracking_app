@@ -15,7 +15,7 @@ Future<bool> isLoggedIn() async {
   bool isLoggedIn = false;
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   final String? token = prefs.getString('auth_token');
-  if (token.toString().isNotEmpty) {
+  if (token != null && token.length > 1) {
     isLoggedIn = true;
   }
   return isLoggedIn;
