@@ -119,24 +119,26 @@ class LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         onPressed: () async {
-                          bool success = await loginUser(
-                              myUsernameController.text,
-                              myPasswordController.text);
-                          if (success) {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const customBottomNavigationBar(
-                                            initialPageIndex: 0)));
-                          } else {
-                            showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (context) {
-                                  return const AlertDialog(
-                                      content: Text("Login Failed"));
-                                });
+                          if (_formKey.currentState!.validate()) {
+                            bool success = await loginUser(
+                                myUsernameController.text,
+                                myPasswordController.text);
+                            if (success) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const customBottomNavigationBar(
+                                              initialPageIndex: 0)));
+                            } else {
+                              showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (context) {
+                                    return const AlertDialog(
+                                        content: Text("Login Failed"));
+                                  });
+                            }
                           }
                         },
                         child: const Text(

@@ -27,6 +27,7 @@ class SignUpFormField extends StatelessWidget {
         width: Width,
         height: Height,
         child: TextFormField(
+            controller: Controller,
             validator: Validator,
             textAlignVertical: TextAlignVertical.center,
             style: TextStyle(fontSize: FontSize, color: FontColor),
@@ -67,6 +68,7 @@ class SignUpFormFieldNumber extends StatelessWidget {
         width: Width,
         height: Height,
         child: TextFormField(
+            controller: Controller,
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'This field cannot be empty';
@@ -127,6 +129,7 @@ class SignUpFormFieldPasswordState extends State<SignUpFormFieldPassword> {
         width: widget.Width,
         height: widget.Height,
         child: TextFormField(
+            controller: widget.Controller,
             validator: widget.Validator,
             textAlignVertical: TextAlignVertical.center,
             style:
