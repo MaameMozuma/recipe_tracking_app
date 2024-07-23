@@ -53,7 +53,7 @@ def signup():
         # clean fields
         cleaned_data = h.clean_signup_fields(request)
 
-        # Salt and hash passwprd
+        # Salt and hash password
         salt, hashed_password = h.hash_password(cleaned_data.get('password'))
         cleaned_data['salt'] = salt
         cleaned_data['password'] = hashed_password
@@ -116,7 +116,6 @@ def update_account():
         return jsonify({"message": "Profile updated successfully"}), 200
     else:
         return jsonify({"error": "User not found"}), 404
-
 
 
 

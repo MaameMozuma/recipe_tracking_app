@@ -6,6 +6,7 @@ from api_config import app, db
 import usergoals_endpoints
 import nutrition_steps_endpoints
 import account_endpoints
+import shareable_endpoints
 
 @functions_framework.http
 def main_entry(request):
