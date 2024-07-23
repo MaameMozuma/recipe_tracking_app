@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:team_proj_leanne/pages/widgets/meal_detail.dart';
 
-void showMealDetailModal(BuildContext context, Map<String, dynamic> meal) {
+void showMealDetailModal(BuildContext context, Map<String, dynamic> meal, VoidCallback onDelete) {
   showModalBottomSheet(
     context: context,
     shape: const RoundedRectangleBorder(
@@ -14,10 +14,16 @@ void showMealDetailModal(BuildContext context, Map<String, dynamic> meal) {
           return SingleChildScrollView(
             controller: scrollController,
             child: MealDetailCard(
-              mealName: meal['name'],
-              mealCalories: meal['totalCalories'],
-              mealImage: meal['mealImage'],
-              mealIngredients: meal['mealIngredients'],
+              mealName: meal['meal_name'],
+              mealCalories: meal['total_calories'],
+              mealImage: meal['image_url'],
+              mealIngredients: meal['ingredients'],
+              onDelete: () async {
+                // Call the onDelete callback
+                onDelete();
+                // Close the dialog after deletion
+                Navigator.pop(context);
+              },
             ),
           );
         } 

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ProgressCard extends StatelessWidget {
-  const ProgressCard({super.key});
+  final String mainText;
+  final String subText;
+  final String type;
+  const ProgressCard({super.key, required this.mainText, required this.subText, required this.type});
 
   @override
   Widget build(BuildContext context) {
-    double progress = 0.7; // 70% progress for example
+    double progress = 1; // 70% progress for example
 
     return Card(
       color: const Color.fromARGB(255, 249, 249, 252),
@@ -22,7 +25,7 @@ class ProgressCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(
+            SizedBox(
               width: 135,
               // height: 30,
               child: Align(
@@ -30,16 +33,16 @@ class ProgressCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.circle,
                       color: Color.fromARGB(255, 120, 82, 174),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
                     Text(
-                      'Steps',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      type,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -57,29 +60,29 @@ class ProgressCard extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 8.0,
-                    backgroundColor: Color.fromARGB(255, 230, 230, 250),
+                    backgroundColor: const Color.fromARGB(255, 230, 230, 250),
                     valueColor: const AlwaysStoppedAnimation<Color>(
                         Color.fromARGB(255, 120, 82, 174)),
                   ),
                 ),
-                const Column(
+                Column(
                   children: [
                     Text(
-                      '561',
-                      style: TextStyle(
-                        fontSize: 30.0,
+                      mainText,
+                      style: const TextStyle(
+                        fontSize: 25.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 0,
                     ),
                     Text(
-                      'steps',
-                      style: TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
+                      subText.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w900,
                         color: Color.fromARGB(255, 120, 82, 174),
                       ),
                     ),

@@ -9,6 +9,7 @@ class Recipe {
   final String details;
   final int duration;
   final List<Step> steps;
+  final String? imageUrl;
   final double? totalCalories; // Make this nullable
 
   Recipe({
@@ -19,6 +20,7 @@ class Recipe {
     required this.details,
     required this.duration,
     required this.steps,
+    this.imageUrl,
     this.totalCalories, // Make this optional
   });
 
@@ -37,6 +39,7 @@ class Recipe {
       details: json['details'],
       duration: json['duration'],
       steps: stepList,
+      imageUrl: json["image_url"],
       userRecipe: json['user_recipe'] ?? false,
       totalCalories:
           json['total_calories']?.toDouble(), // Handle optional value
@@ -51,6 +54,7 @@ class Recipe {
       'duration': duration,
       'steps': steps.map((s) => s.toJson()).toList(),
       'recipe_id': recipeId,
+      'image_url': imageUrl,
       if (totalCalories != null) 'total_calories': totalCalories,
     };
     return jsonMap;

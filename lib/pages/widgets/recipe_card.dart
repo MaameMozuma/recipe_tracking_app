@@ -8,6 +8,7 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // print(recipe.imageUrl);
     return SizedBox(
       width: 190,
       child: Card(
@@ -41,12 +42,27 @@ class RecipeCard extends StatelessWidget {
                 child: SizedBox(
                   width: 100,
                   height: 100,
-                  child: Image.network(
-                                      'https://storage.googleapis.com/mobiledev-f3a76.appspot.com/recipe_images/food-template2.png',
-                                      fit: BoxFit
-                    .cover, // Adjust this to control how the image should be resized or fit.
-                                    ),
-                ),
+                  child: recipe.imageUrl != null ? Image.network(
+                  recipe.imageUrl!,
+                  width: 55,
+                  height: 55,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Handle image loading error
+                    return Container(
+                      width: 55,
+                      height: 55,
+                      color:
+                          Colors.grey[300], // Background color for error state
+                      child: Icon(
+                        Icons.fastfood, // Default meal icon
+                        size: 30,
+                        color: Colors.grey[600],
+                      ),
+                    );
+                  },
+                ): SizedBox(),
+                )
               ),
               const SizedBox(
                 height: 5,

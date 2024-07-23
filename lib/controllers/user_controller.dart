@@ -20,4 +20,16 @@ class UserController {
           'Failed to load user. Status code: ${response.statusCode}');
     }
   }
+
+  Future<bool> editUser(profile) async {
+    final response = await _apiService.patch(
+      'update_account',
+      profile,
+      token: token,
+    );
+    if (response.statusCode != 200) {
+      return false;
+    }
+    return true;
+  }
 }

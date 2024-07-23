@@ -3,7 +3,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
 class CustomCalendar extends StatefulWidget {
-  const CustomCalendar({super.key});
+  final Function(DateTime) onDateSelected;
+  const CustomCalendar({super.key, required this.onDateSelected});
 
   @override
   State<CustomCalendar> createState() => _CustomCalendarState();
@@ -55,6 +56,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
               _selectedDay = selectedDay;
               _focusedDay = focusedDay;
             });
+            widget.onDateSelected(selectedDay);
           },
           headerVisible: false,
           headerStyle: const HeaderStyle(

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'http://127.0.0.1:5000';
+  static const String baseUrl = 'http://10.0.2.2:5000';
 
   // Function to send a POST request with optional Authorization header
   Future<http.Response> post(String endpoint, dynamic data,
@@ -62,6 +62,23 @@ class ApiService {
     };
 
     final response = await http.put(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: headers,
+      body: jsonEncode(data),
+    );
+    return response;
+  }
+
+  Future<http.Response> patch(String endpoint, dynamic data,
+      {String? token}) async {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      if (token != null)
+        'Authorization':
+            'Bearer $token', // Conditionally add Authorization header
+    };
+
+    final response = await http.patch(
       Uri.parse('$baseUrl/$endpoint'),
       headers: headers,
       body: jsonEncode(data),
